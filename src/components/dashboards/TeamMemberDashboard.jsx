@@ -151,19 +151,19 @@ const TeamMemberDashboard = () => {
       </div>
 
       <div className="flex-1 lg:ml-0 overflow-y-auto h-screen">
-        <header className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-8">
+        <header className="bg-white shadow-sm border-b h-14 sm:h-16 flex items-center justify-between px-4 sm:px-8">
            <div className="flex items-center">
-             <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4"><SafeIcon icon={FiMenu} className="text-xl" /></button>
-             <h1 className="text-2xl font-bold text-gray-900">{tabs.find(t => t.id === activeTab)?.label}</h1>
+             <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-3 sm:mr-4"><SafeIcon icon={FiMenu} className="text-xl" /></button>
+             <h1 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{tabs.find(t => t.id === activeTab)?.label}</h1>
            </div>
            <NotificationBell />
         </header>
 
-        <div className="p-8">
+        <div className="p-3 sm:p-6 lg:p-8">
           {activeTab === 'profile' && (
-            <div className="bg-white p-6 rounded-lg border border-gray-200">
-               <h3 className="text-xl font-bold mb-6">Profile Settings</h3>
-               <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200">
+               <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">Profile Settings</h3>
+               <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                  <div><label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input type="text" value={profileData.fullName} onChange={(e) => setProfileData({...profileData, fullName: e.target.value})} className="w-full p-2 border rounded-lg" /></div>
                  <div><label className="block text-sm font-medium text-gray-700 mb-1">Phone</label><input type="text" value={profileData.phone} onChange={(e) => setProfileData({...profileData, phone: e.target.value})} className="w-full p-2 border rounded-lg" /></div>
                </div>
@@ -171,14 +171,14 @@ const TeamMemberDashboard = () => {
             </div>
           )}
           {activeTab === 'schedule' && (
-             <div className="space-y-4">
+             <div className="space-y-3 sm:space-y-4">
                {assignedBookings.map(b => (
-                 <div key={b.id} className="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center">
+                 <div key={b.id} className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                     <div>
-                      <h4 className="font-bold text-navy">{b.service?.name}</h4>
-                      <p className="text-sm text-gray-500">{format(new Date(b.booking_date), 'PPP p')}</p>
+                      <h4 className="font-bold text-navy text-sm sm:text-base">{b.service?.name}</h4>
+                      <p className="text-xs sm:text-sm text-gray-500">{format(new Date(b.booking_date), 'PPP p')}</p>
                     </div>
-                    <button onClick={() => handleStartChat(b)} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors"><SafeIcon icon={FiMessageSquare} /></button>
+                    <button onClick={() => handleStartChat(b)} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors self-end sm:self-auto"><SafeIcon icon={FiMessageSquare} /></button>
                  </div>
                ))}
              </div>
@@ -213,41 +213,41 @@ const TeamMemberDashboard = () => {
           )}
           
           {activeTab === 'training' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Training Resources</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="border border-gray-100 rounded-xl p-6 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
-                      <SafeIcon icon={FiBookOpen} className="text-blue-600 text-xl" />
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-8">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Training Resources</h3>
+                <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="border border-gray-100 rounded-lg sm:rounded-xl p-4 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                      <SafeIcon icon={FiBookOpen} className="text-blue-600 text-lg sm:text-xl" />
                     </div>
-                    <h4 className="font-bold text-navy mb-2">Car Seat Safety Certification</h4>
-                    <p className="text-sm text-gray-500 mb-4">Complete the CPST certification course to become a certified car seat technician.</p>
-                    <a href="https://cert.safekids.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm font-medium hover:underline">Start Course →</a>
+                    <h4 className="font-bold text-navy mb-2 text-sm sm:text-base">Car Seat Safety Certification</h4>
+                    <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Complete the CPST certification course to become a certified car seat technician.</p>
+                    <a href="https://cert.safekids.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 text-xs sm:text-sm font-medium hover:underline">Start Course →</a>
                   </div>
-                  <div className="border border-gray-100 rounded-xl p-6 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4">
-                      <SafeIcon icon={FiTool} className="text-green-600 text-xl" />
+                  <div className="border border-gray-100 rounded-lg sm:rounded-xl p-4 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                      <SafeIcon icon={FiTool} className="text-green-600 text-lg sm:text-xl" />
                     </div>
-                    <h4 className="font-bold text-navy mb-2">Installation Best Practices</h4>
-                    <p className="text-sm text-gray-500 mb-4">Learn the proper techniques for installing various car seat types.</p>
-                    <button className="text-blue-600 text-sm font-medium hover:underline">View Guide →</button>
+                    <h4 className="font-bold text-navy mb-2 text-sm sm:text-base">Installation Best Practices</h4>
+                    <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Learn the proper techniques for installing various car seat types.</p>
+                    <button className="text-blue-600 text-xs sm:text-sm font-medium hover:underline">View Guide →</button>
                   </div>
-                  <div className="border border-gray-100 rounded-xl p-6 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-                      <SafeIcon icon={FiUser} className="text-purple-600 text-xl" />
+                  <div className="border border-gray-100 rounded-lg sm:rounded-xl p-4 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                      <SafeIcon icon={FiUser} className="text-purple-600 text-lg sm:text-xl" />
                     </div>
-                    <h4 className="font-bold text-navy mb-2">Customer Communication</h4>
-                    <p className="text-sm text-gray-500 mb-4">Tips for effectively communicating with parents about car seat safety.</p>
-                    <button className="text-blue-600 text-sm font-medium hover:underline">Read More →</button>
+                    <h4 className="font-bold text-navy mb-2 text-sm sm:text-base">Customer Communication</h4>
+                    <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Tips for effectively communicating with parents about car seat safety.</p>
+                    <button className="text-blue-600 text-xs sm:text-sm font-medium hover:underline">Read More →</button>
                   </div>
-                  <div className="border border-gray-100 rounded-xl p-6 hover:shadow-md transition-shadow">
-                    <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
-                      <SafeIcon icon={FiAlertCircle} className="text-orange-600 text-xl" />
+                  <div className="border border-gray-100 rounded-lg sm:rounded-xl p-4 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                      <SafeIcon icon={FiAlertCircle} className="text-orange-600 text-lg sm:text-xl" />
                     </div>
-                    <h4 className="font-bold text-navy mb-2">Safety Recalls & Updates</h4>
-                    <p className="text-sm text-gray-500 mb-4">Stay updated on the latest car seat recalls and safety bulletins.</p>
-                    <a href="https://www.nhtsa.gov/recalls" target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm font-medium hover:underline">Check Recalls →</a>
+                    <h4 className="font-bold text-navy mb-2 text-sm sm:text-base">Safety Recalls & Updates</h4>
+                    <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">Stay updated on the latest car seat recalls and safety bulletins.</p>
+                    <a href="https://www.nhtsa.gov/recalls" target="_blank" rel="noopener noreferrer" className="text-blue-600 text-xs sm:text-sm font-medium hover:underline">Check Recalls →</a>
                   </div>
                 </div>
               </div>

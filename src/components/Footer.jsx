@@ -75,9 +75,10 @@ import React from 'react';
             {/* Bottom Bar */}
             <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
               <p className="text-gray-400">© {new Date().getFullYear()} FitMySeat. All rights reserved.</p>
-              <div className="flex space-x-6 mt-4 md:mt-0">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4 md:mt-0">
                 <Link to="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
                 <Link to="/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link>
+                <Link to="/cookies" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</Link>
               </div>
             </div>
           </div>

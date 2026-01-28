@@ -14,6 +14,10 @@ import ListingProfilePage from './components/pages/ListingProfilePage';
 import ContactPage from './components/pages/ContactPage';
 import FAQPage from './components/pages/FAQPage';
 import BlogPostPage from './components/pages/BlogPostPage';
+import PrivacyPolicyPage from './components/pages/PrivacyPolicyPage';
+import TermsOfServicePage from './components/pages/TermsOfServicePage';
+import CookiePolicyPage from './components/pages/CookiePolicyPage';
+import CookieConsent from './components/common/CookieConsent';
 import './App.css';
 
 function App() {
@@ -34,9 +38,13 @@ function App() {
               <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/faq" element={<FAQPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
+              <Route path="/cookies" element={<CookiePolicyPage />} />
               <Route path="/" element={<DashboardRouter />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            <CookieConsent />
           </div>
         </Router>
       </BookingProvider>

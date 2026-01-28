@@ -190,34 +190,34 @@ const OrganizationDashboard = () => {
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 h-20 flex items-center justify-between px-8 z-10 shrink-0">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><SafeIcon icon={FiMenu} className="text-2xl" /></button>
-            <h1 className="text-xl font-black text-navy uppercase tracking-widest">{visibleTabs.find(t => t.id === activeTab)?.label}</h1>
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 h-16 sm:h-20 flex items-center justify-between px-4 sm:px-8 z-10 shrink-0">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><SafeIcon icon={FiMenu} className="text-xl sm:text-2xl" /></button>
+            <h1 className="text-base sm:text-xl font-black text-navy uppercase tracking-widest truncate max-w-[150px] sm:max-w-none">{visibleTabs.find(t => t.id === activeTab)?.label}</h1>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <NotificationBell />
-            <div className="text-right hidden sm:block">
+            <div className="text-right hidden md:block">
               <p className="text-sm font-bold text-navy leading-none">{organization?.name || 'Organization'}</p>
               <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">{organization?.subscription_tier} Tier</p>
             </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><SafeIcon icon={FiUser} className="text-xl" /></div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><SafeIcon icon={FiUser} className="text-lg sm:text-xl" /></div>
           </div>
         </header>
 
         {/* Dashboard Main View */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50/50">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-8 bg-gray-50/50">
           <AnimatePresence mode="wait">
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
               {activeTab === 'overview' && (
-                <div className="space-y-8">
-                  <div className="bg-gradient-to-br from-navy to-blue-900 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden">
+                <div className="space-y-4 sm:space-y-8">
+                  <div className="bg-gradient-to-br from-navy to-blue-900 rounded-2xl sm:rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden">
                     <div className="relative z-10 text-left">
-                      <h2 className="text-4xl font-black mb-4">Good morning, {profile?.full_name?.split(' ')[0]}!</h2>
-                      <p className="text-blue-200 text-lg max-w-lg">Your business overview and performance stats are ready.</p>
+                      <h2 className="text-2xl sm:text-4xl font-black mb-2 sm:mb-4">Good morning, {profile?.full_name?.split(' ')[0]}!</h2>
+                      <p className="text-blue-200 text-sm sm:text-lg max-w-lg">Your business overview and performance stats are ready.</p>
                     </div>
                     {/* Quick Stats Overlay */}
-                    <div className="absolute right-10 bottom-10 hidden md:block">
+                    <div className="absolute right-4 sm:right-10 bottom-4 sm:bottom-10 hidden lg:block">
                       <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
                         <p className="text-xs font-black text-blue-300 uppercase tracking-widest mb-1">Total Balance</p>
                         <p className="text-2xl font-black text-white">${organization?.balance?.toFixed(2) || '0.00'}</p>
@@ -232,17 +232,17 @@ const OrganizationDashboard = () => {
 
               {activeTab === 'listings' && (
                 <div className="space-y-6 text-left">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                      <h3 className="text-xl font-bold text-navy">Business Listings</h3>
-                      <p className="text-sm text-gray-500">Manage your public presence and SEO</p>
+                      <h3 className="text-lg sm:text-xl font-bold text-navy">Business Listings</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">Manage your public presence and SEO</p>
                     </div>
-                    <button onClick={() => { setEditingListing(null); setShowListingForm(true); }} className="bg-navy text-white px-5 py-2.5 rounded-xl flex items-center space-x-2 text-sm font-bold shadow-lg shadow-navy/20 transition-all hover:scale-105">
+                    <button onClick={() => { setEditingListing(null); setShowListingForm(true); }} className="bg-navy text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl flex items-center space-x-2 text-sm font-bold shadow-lg shadow-navy/20 transition-all hover:scale-105 w-full sm:w-auto justify-center">
                       <SafeIcon icon={FiPlus} />
                       <span>Add Listing</span>
                     </button>
                   </div>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {listings.map(listing => (
                       <ListingCard 
                         key={listing.id} 
@@ -267,9 +267,9 @@ const OrganizationDashboard = () => {
                     <h3 className="text-xl font-bold text-navy">Messages</h3>
                     <p className="text-sm text-gray-500">Communicate with parents and customers</p>
                   </div>
-                  <div className="grid lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                      <div className="p-4 border-b border-gray-100 font-bold text-navy">Conversations</div>
+                  <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="lg:col-span-1 bg-white rounded-xl sm:rounded-2xl border border-gray-100 overflow-hidden max-h-[300px] lg:max-h-[500px]">
+                      <div className="p-3 sm:p-4 border-b border-gray-100 font-bold text-navy text-sm sm:text-base">Conversations</div>
                       <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto">
                         {conversations.length === 0 ? (
                           <div className="p-8 text-center text-gray-400">
@@ -311,14 +311,14 @@ const OrganizationDashboard = () => {
               )}
               
               {activeTab === 'team' && (
-                <div className="space-y-8 text-left">
-                  <div className="flex justify-between items-center">
-                    <div><h3 className="text-xl font-bold text-navy">Team Management</h3><p className="text-sm text-gray-500">Manage staff and permissions</p></div>
-                    <button onClick={() => setShowInviteModal(true)} className="bg-blue-600 text-white px-5 py-2.5 rounded-xl flex items-center space-x-2 text-sm font-bold shadow-lg shadow-blue-600/20"><SafeIcon icon={FiPlus} /><span>Invite Member</span></button>
+                <div className="space-y-6 sm:space-y-8 text-left">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div><h3 className="text-lg sm:text-xl font-bold text-navy">Team Management</h3><p className="text-xs sm:text-sm text-gray-500">Manage staff and permissions</p></div>
+                    <button onClick={() => setShowInviteModal(true)} className="bg-blue-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl flex items-center space-x-2 text-sm font-bold shadow-lg shadow-blue-600/20 w-full sm:w-auto justify-center"><SafeIcon icon={FiPlus} /><span>Invite Member</span></button>
                   </div>
-                  <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
-                    <div className="p-6 border-b border-gray-50 font-bold text-navy">Active Team Members</div>
-                    <div className="overflow-x-auto">
+                  <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+                    <div className="p-4 sm:p-6 border-b border-gray-50 font-bold text-navy">Active Team Members</div>
+                    <div className="overflow-x-auto -mx-px">
                       <table className="w-full text-left">
                         <thead className="bg-gray-50/50 border-b border-gray-100">
                           <tr>
@@ -349,10 +349,10 @@ const OrganizationDashboard = () => {
               {activeTab === 'api' && <ApiKeyManagement organizationId={profile.organization_id} />}
               
               {activeTab === 'subscription' && (
-                <div className="max-w-4xl mx-auto space-y-8 text-left">
-                  <div className="bg-white p-10 rounded-[2.5rem] border border-gray-200 shadow-xl relative overflow-hidden">
-                    <h3 className="text-sm font-black text-blue-600 uppercase tracking-widest mb-2">Current Plan</h3>
-                    <h2 className="text-5xl font-black text-navy mb-6">{organization?.subscription_tier || 'Free'}</h2>
+                <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 text-left">
+                  <div className="bg-white p-6 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-gray-200 shadow-xl relative overflow-hidden">
+                    <h3 className="text-xs sm:text-sm font-black text-blue-600 uppercase tracking-widest mb-2">Current Plan</h3>
+                    <h2 className="text-3xl sm:text-5xl font-black text-navy mb-4 sm:mb-6">{organization?.subscription_tier || 'Free'}</h2>
                     <div className="flex flex-wrap gap-4">
                       <div className="bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
                         <p className="text-[10px] font-black text-gray-400 uppercase">Withdrawal Fee</p>
@@ -362,18 +362,18 @@ const OrganizationDashboard = () => {
                   </div>
                   
                   {/* Developer Coupon Section */}
-                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-8 rounded-3xl border border-purple-100 shadow-sm">
+                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-purple-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                        <SafeIcon icon={FiGift} className="text-purple-600" />
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <SafeIcon icon={FiGift} className="text-purple-600 text-sm sm:text-base" />
                       </div>
                       <div>
-                        <h3 className="font-black text-navy">Developer Coupon</h3>
-                        <p className="text-sm text-gray-500">Have a dev/staging code? Apply it here</p>
+                        <h3 className="font-black text-navy text-sm sm:text-base">Developer Coupon</h3>
+                        <p className="text-xs sm:text-sm text-gray-500">Have a dev/staging code? Apply it here</p>
                       </div>
                     </div>
                     
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="text"
                         value={couponCode}

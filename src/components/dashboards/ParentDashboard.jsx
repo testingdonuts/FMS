@@ -131,9 +131,9 @@ const ParentDashboard = () => {
   };
 
   const renderMessages = () => (
-    <div className="grid lg:grid-cols-3 gap-6 h-[650px] text-left">
-      <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col shadow-sm">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+    <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 h-auto lg:h-[650px] text-left">
+      <div className="lg:col-span-1 bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden flex flex-col shadow-sm max-h-[300px] lg:max-h-none">
+        <div className="p-3 sm:p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
           <h3 className="font-bold text-navy flex items-center">
             <SafeIcon icon={FiMessageSquare} className="mr-2 text-blue-600" />
             Inbox
@@ -227,16 +227,16 @@ const ParentDashboard = () => {
       </div>
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 h-20 flex items-center justify-between px-8 z-10">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><SafeIcon icon={FiMenu} className="text-2xl" /></button>
-          <h1 className="text-xl font-black text-navy">{tabs.find(t => t.id === activeTab)?.label}</h1>
-          <div className="flex items-center space-x-3">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 h-14 sm:h-20 flex items-center justify-between px-4 sm:px-8 z-10">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><SafeIcon icon={FiMenu} className="text-xl sm:text-2xl" /></button>
+          <h1 className="text-base sm:text-xl font-black text-navy truncate">{tabs.find(t => t.id === activeTab)?.label}</h1>
+          <div className="flex items-center space-x-2 sm:space-x-3">
             <NotificationBell />
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><SafeIcon icon={FiUser} className="text-xl" /></div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><SafeIcon icon={FiUser} className="text-lg sm:text-xl" /></div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50/50">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-8 bg-gray-50/50">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -245,19 +245,19 @@ const ParentDashboard = () => {
               exit={{ opacity: 0, y: -10 }}
             >
               {activeTab === 'home' && (
-                <div className="space-y-6 text-left">
-                  <div className="bg-gradient-to-br from-navy to-blue-900 rounded-2xl p-8 text-white shadow-xl">
-                    <h2 className="text-3xl font-bold mb-2">Hello, {profile?.full_name || 'Parent'}!</h2>
-                    <p className="text-blue-200 text-lg">Manage your child's safety services in one secure place.</p>
+                <div className="space-y-4 sm:space-y-6 text-left">
+                  <div className="bg-gradient-to-br from-navy to-blue-900 rounded-xl sm:rounded-2xl p-5 sm:p-8 text-white shadow-xl">
+                    <h2 className="text-xl sm:text-3xl font-bold mb-2">Hello, {profile?.full_name || 'Parent'}!</h2>
+                    <p className="text-blue-200 text-sm sm:text-lg">Manage your child's safety services in one secure place.</p>
                   </div>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                      <span className="text-gray-500 text-sm font-bold uppercase">Active Bookings</span>
-                      <p className="text-3xl font-black text-navy">{bookings.filter(b => ['pending', 'confirmed'].includes(b.status)).length}</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
+                    <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
+                      <span className="text-gray-500 text-xs sm:text-sm font-bold uppercase">Active Bookings</span>
+                      <p className="text-2xl sm:text-3xl font-black text-navy">{bookings.filter(b => ['pending', 'confirmed'].includes(b.status)).length}</p>
                     </div>
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                      <span className="text-gray-500 text-sm font-bold uppercase">Active Rentals</span>
-                      <p className="text-3xl font-black text-blue-600">{rentals.filter(r => ['pending', 'active'].includes(r.status)).length}</p>
+                    <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
+                      <span className="text-gray-500 text-xs sm:text-sm font-bold uppercase">Active Rentals</span>
+                      <p className="text-2xl sm:text-3xl font-black text-blue-600">{rentals.filter(r => ['pending', 'active'].includes(r.status)).length}</p>
                     </div>
                   </div>
                 </div>
@@ -306,8 +306,8 @@ const ParentDashboard = () => {
               )}
 
               {activeTab === 'profile' && (
-                <div className="bg-white p-8 rounded-2xl border border-gray-100 max-w-2xl">
-                  <h3 className="text-2xl font-bold text-navy mb-6">Account Settings</h3>
+                <div className="bg-white p-5 sm:p-8 rounded-xl sm:rounded-2xl border border-gray-100 max-w-2xl">
+                  <h3 className="text-xl sm:text-2xl font-bold text-navy mb-4 sm:mb-6">Account Settings</h3>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-1">Full Name</label>

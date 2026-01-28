@@ -169,19 +169,19 @@ const TaskManagement = ({ organizationId, userId, userRole = 'organization' }) =
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
-          <h2 className="text-xl font-black text-navy">Task Management</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-lg sm:text-xl font-black text-navy">Task Management</h2>
+          <p className="text-xs sm:text-sm text-gray-500">
             {userRole === 'team_member' ? 'Your assigned tasks' : 'Manage team tasks and assignments'}
           </p>
         </div>
         {userRole === 'organization' && (
           <button
             onClick={() => handleOpenModal()}
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center"
           >
             <SafeIcon icon={FiPlus} />
             <span>New Task</span>
@@ -190,12 +190,12 @@ const TaskManagement = ({ organizationId, userId, userRole = 'organization' }) =
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
         {['all', 'todo', 'in_progress', 'completed'].map(status => (
           <button
             key={status}
             onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+            className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex-shrink-0 ${
               filter === status
                 ? 'bg-navy text-white shadow-lg'
                 : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
@@ -339,16 +339,16 @@ const TaskManagement = ({ organizationId, userId, userRole = 'organization' }) =
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4"
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl"
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto"
             >
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-black text-navy">
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-black text-navy">
                   {editingTask ? 'Edit Task' : 'New Task'}
                 </h3>
                 <button
@@ -359,36 +359,36 @@ const TaskManagement = ({ organizationId, userId, userRole = 'organization' }) =
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 mb-1">Title *</label>
+                  <label className="block text-xs sm:text-sm font-bold text-gray-600 mb-1">Title *</label>
                   <input
                     type="text"
                     value={taskForm.title}
                     onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
                     placeholder="What needs to be done?"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 mb-1">Description</label>
+                  <label className="block text-xs sm:text-sm font-bold text-gray-600 mb-1">Description</label>
                   <textarea
                     value={taskForm.description}
                     onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
                     placeholder="Add more details..."
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-600 mb-1">Priority</label>
+                    <label className="block text-xs sm:text-sm font-bold text-gray-600 mb-1">Priority</label>
                     <select
                       value={taskForm.priority}
                       onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -398,23 +398,23 @@ const TaskManagement = ({ organizationId, userId, userRole = 'organization' }) =
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-600 mb-1">Due Date</label>
+                    <label className="block text-xs sm:text-sm font-bold text-gray-600 mb-1">Due Date</label>
                     <input
                       type="date"
                       value={taskForm.due_date}
                       onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     />
                   </div>
                 </div>
 
                 {members.length > 0 && (
                   <div>
-                    <label className="block text-sm font-bold text-gray-600 mb-1">Assign To</label>
+                    <label className="block text-xs sm:text-sm font-bold text-gray-600 mb-1">Assign To</label>
                     <select
                       value={taskForm.assignee_id}
                       onChange={(e) => setTaskForm({ ...taskForm, assignee_id: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     >
                       <option value="">Unassigned</option>
                       {members.map(member => (
@@ -427,11 +427,11 @@ const TaskManagement = ({ organizationId, userId, userRole = 'organization' }) =
                 )}
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 mb-1">Task Type</label>
+                  <label className="block text-xs sm:text-sm font-bold text-gray-600 mb-1">Task Type</label>
                   <select
                     value={taskForm.task_type}
                     onChange={(e) => setTaskForm({ ...taskForm, task_type: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   >
                     <option value="other">General</option>
                     <option value="installation">Installation</option>
@@ -443,16 +443,16 @@ const TaskManagement = ({ organizationId, userId, userRole = 'organization' }) =
                   </select>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-3 sm:pt-4">
                   <button
                     onClick={() => { setShowModal(false); setEditingTask(null); }}
-                    className="flex-1 py-3 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50"
+                    className="flex-1 py-2.5 sm:py-3 border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 text-sm sm:text-base"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSaveTask}
-                    className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 flex items-center justify-center gap-2"
+                    className="flex-1 py-2.5 sm:py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 flex items-center justify-center gap-2 text-sm sm:text-base"
                   >
                     <SafeIcon icon={FiCheck} />
                     {editingTask ? 'Update Task' : 'Create Task'}

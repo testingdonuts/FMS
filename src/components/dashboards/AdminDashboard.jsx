@@ -307,15 +307,36 @@ const AdminDashboard = () => {
     }));
   };
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-50 text-left">
-      <header className="bg-navy p-8 text-white">
-        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter">Platform Control</h1>
-            <p className="text-blue-300 font-bold text-sm">Super Admin Dashboard</p>
+      <header className="bg-navy p-4 sm:p-6 lg:p-8 text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center gap-4">
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-tighter">Platform Control</h1>
+              <p className="text-blue-300 font-bold text-xs sm:text-sm">Super Admin Dashboard</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="lg:hidden p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+              >
+                <SafeIcon icon={menuOpen ? FiX : FiIcons.FiMenu} className="text-xl" />
+              </button>
+              <button
+                onClick={signOut}
+                className="hidden sm:flex px-4 py-2 rounded-full font-bold text-sm transition-all bg-red-500/20 text-red-200 hover:bg-red-500/40 items-center gap-2"
+              >
+                <SafeIcon icon={FiLogOut} />
+                <span className="hidden md:inline">Logout</span>
+              </button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          
+          {/* Desktop tabs */}
+          <div className="hidden lg:flex flex-wrap gap-2 mt-4">
             {['overview', 'analytics', 'organizations', 'users', 'payouts', 'tickets', 'announcements', 'blog', 'emails', 'settings', 'activity'].map(tab => (
               <button
                 key={tab}
@@ -327,18 +348,35 @@ const AdminDashboard = () => {
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
-            <button
-              onClick={signOut}
-              className="px-6 py-2 rounded-full font-bold text-sm transition-all bg-red-500/20 text-red-200 hover:bg-red-500/40 flex items-center gap-2"
-            >
-              <SafeIcon icon={FiLogOut} />
-              Logout
-            </button>
           </div>
+          
+          {/* Mobile dropdown menu */}
+          {menuOpen && (
+            <div className="lg:hidden mt-4 bg-white/10 backdrop-blur-lg rounded-2xl p-4 grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {['overview', 'analytics', 'organizations', 'users', 'payouts', 'tickets', 'announcements', 'blog', 'emails', 'settings', 'activity'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => { setActiveTab(tab); setMenuOpen(false); }}
+                  className={`px-3 py-2 rounded-xl font-bold text-xs transition-all ${
+                    activeTab === tab ? 'bg-white text-navy shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+              <button
+                onClick={signOut}
+                className="col-span-3 sm:col-span-4 mt-2 px-4 py-2 rounded-xl font-bold text-sm transition-all bg-red-500/30 text-red-200 hover:bg-red-500/40 flex items-center justify-center gap-2"
+              >
+                <SafeIcon icon={FiLogOut} />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto p-8">
+      <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-navy"></div>
@@ -353,14 +391,14 @@ const AdminDashboard = () => {
             >
               {activeTab === 'overview' && stats && (
                 <>
-                  <div className="grid md:grid-cols-4 gap-6 mb-8">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
                     <StatCard icon={FiTrendingUp} label="Platform Revenue" value={`$${stats.total_platform_revenue || 0}`} color="text-green-600" />
                     <StatCard icon={FiClock} label="Pending Payouts" value={`$${stats.pending_payout_amount || 0}`} color="text-blue-600" />
                     <StatCard icon={FiBriefcase} label="Org Applications" value={stats.pending_verifications || 0} color="text-yellow-600" />
                     <StatCard icon={FiUsers} label="Total Users" value={stats.total_users || 0} color="text-purple-600" />
                   </div>
                   
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
                     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                       <h3 className="text-lg font-black text-navy mb-4">Quick Stats</h3>
                       <div className="space-y-3">
