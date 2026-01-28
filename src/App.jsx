@@ -13,6 +13,7 @@ import ListingsPage from './components/pages/ListingsPage';
 import ListingProfilePage from './components/pages/ListingProfilePage';
 import ContactPage from './components/pages/ContactPage';
 import FAQPage from './components/pages/FAQPage';
+import BlogPostPage from './components/pages/BlogPostPage';
 import './App.css';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
               <Route path="/equipment" element={<EquipmentPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPostPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/" element={<DashboardRouter />} />
