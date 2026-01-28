@@ -18,12 +18,17 @@ import ApiKeyManagement from './ApiKeyManagement';
 import EarningsSection from './EarningsSection';
 import TeamInviteModal from '../team/TeamInviteModal';
 import TeamInviteList from '../team/TeamInviteList';
+import TaskManagement from '../tasks/TaskManagement';
+import ChatWindow from '../chat/ChatWindow';
+import NotificationBell from '../notifications/NotificationBell';
+import { supabase } from '../../lib/supabase';
 
 const { 
   FiList, FiUsers, FiPackage, FiCalendar, FiBarChart3, 
   FiPlus, FiMessageSquare, FiMenu, FiX, FiLogOut, 
   FiSettings, FiGlobe, FiUser, FiCreditCard, FiMapPin, 
-  FiCode, FiAlertCircle, FiZap, FiTrash2, FiTrendingUp 
+  FiCode, FiAlertCircle, FiZap, FiTrash2, FiTrendingUp,
+  FiCheckSquare, FiGift, FiCheck
 } = FiIcons;
 
 const OrganizationDashboard = () => {
@@ -40,6 +45,11 @@ const OrganizationDashboard = () => {
   const [invites, setInvites] = useState([]);
   const [members, setMembers] = useState([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponMessage, setCouponMessage] = useState({ type: '', text: '' });
 
   const isTeams = organization?.subscription_tier === 'Teams';
 
@@ -47,6 +57,7 @@ const OrganizationDashboard = () => {
     { id: 'overview', label: 'Overview', icon: FiBarChart3 },
     { id: 'services', label: 'Services', icon: FiSettings },
     { id: 'bookings', label: 'Bookings', icon: FiCalendar },
+    { id: 'tasks', label: 'Tasks', icon: FiCheckSquare },
     { id: 'messages', label: 'Messages', icon: FiMessageSquare },
     { id: 'earnings', label: 'Earnings', icon: FiTrendingUp },
     { id: 'listings', label: 'Listings', icon: FiList },
@@ -64,6 +75,7 @@ const OrganizationDashboard = () => {
       loadOrgData();
       loadListings();
       loadTeamData();
+      loadConversations();
     }
   }, [profile]);
 
@@ -84,6 +96,50 @@ const OrganizationDashboard = () => {
     ]);
     setInvites(invitesRes.data || []);
     setMembers(membersRes.data || []);
+  };
+
+  const loadConversations = async () => {
+    const { data } = await supabase
+      .from('chat_conversations')
+      .select(`
+        *,
+        parent:parent_id(id, full_name, email),
+        last_message:chat_messages(content, created_at, sender_id)
+      `)
+      .eq('organization_id', profile.organization_id)
+      .order('updated_at', { ascending: false });
+    setConversations(data || []);
+  };
+
+  const handleStartChat = (conversation) => {
+    setSelectedChat({
+      otherUser: conversation.parent,
+      orgId: profile.organization_id,
+      bookingId: conversation.booking_id,
+      contextName: conversation.context_name
+    });
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponMessage({ type: 'error', text: 'Please enter a coupon code' });
+      return;
+    }
+    
+    setCouponLoading(true);
+    setCouponMessage({ type: '', text: '' });
+    
+    const { data, error } = await serviceManagementService.applyDevCoupon(profile.organization_id, couponCode.trim());
+    
+    setCouponLoading(false);
+    
+    if (error) {
+      setCouponMessage({ type: 'error', text: error });
+    } else {
+      setCouponMessage({ type: 'success', text: `Successfully upgraded to ${data.subscription_tier} tier!` });
+      setCouponCode('');
+      setOrganization(data);
+    }
   };
 
   const handleSaveListing = async (formData) => {
@@ -140,6 +196,7 @@ const OrganizationDashboard = () => {
             <h1 className="text-xl font-black text-navy uppercase tracking-widest">{visibleTabs.find(t => t.id === activeTab)?.label}</h1>
           </div>
           <div className="flex items-center space-x-3">
+            <NotificationBell />
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-navy leading-none">{organization?.name || 'Organization'}</p>
               <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-1">{organization?.subscription_tier} Tier</p>
@@ -202,6 +259,56 @@ const OrganizationDashboard = () => {
               {activeTab === 'services' && <ServiceManagement organizationId={profile.organization_id} userRole="organization" />}
               {activeTab === 'bookings' && <BookingManagement organizationId={profile.organization_id} userId={user.id} userRole="organization" />}
               {activeTab === 'equipment' && <EquipmentManagement organizationId={profile.organization_id} userRole="organization" />}
+              {activeTab === 'tasks' && <TaskManagement organizationId={profile.organization_id} userId={user?.id} userRole="organization" />}
+              
+              {activeTab === 'messages' && (
+                <div className="space-y-6 text-left">
+                  <div>
+                    <h3 className="text-xl font-bold text-navy">Messages</h3>
+                    <p className="text-sm text-gray-500">Communicate with parents and customers</p>
+                  </div>
+                  <div className="grid lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                      <div className="p-4 border-b border-gray-100 font-bold text-navy">Conversations</div>
+                      <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto">
+                        {conversations.length === 0 ? (
+                          <div className="p-8 text-center text-gray-400">
+                            <SafeIcon icon={FiMessageSquare} className="text-4xl mx-auto mb-2 opacity-30" />
+                            <p className="text-sm">No conversations yet</p>
+                          </div>
+                        ) : (
+                          conversations.map(conv => (
+                            <button
+                              key={conv.id}
+                              onClick={() => handleStartChat(conv)}
+                              className={`w-full p-4 text-left hover:bg-gray-50 transition-colors ${selectedChat?.bookingId === conv.booking_id ? 'bg-blue-50' : ''}`}
+                            >
+                              <p className="font-bold text-navy text-sm">{conv.parent?.full_name || 'Parent'}</p>
+                              <p className="text-xs text-gray-400 truncate">{conv.context_name || 'General inquiry'}</p>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 min-h-[500px]">
+                      {selectedChat ? (
+                        <ChatWindow 
+                          currentUser={user} 
+                          recipient={selectedChat.otherUser} 
+                          orgId={profile.organization_id} 
+                          context={{ bookingId: selectedChat.bookingId, name: selectedChat.contextName }} 
+                          onClose={() => setSelectedChat(null)} 
+                        />
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-gray-400 p-8">
+                          <SafeIcon icon={FiMessageSquare} className="text-5xl mb-4 opacity-20" />
+                          <p className="text-center">Select a conversation or start one from a booking</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {activeTab === 'team' && (
                 <div className="space-y-8 text-left">
@@ -251,6 +358,64 @@ const OrganizationDashboard = () => {
                         <p className="text-[10px] font-black text-gray-400 uppercase">Withdrawal Fee</p>
                         <p className="font-bold text-navy">3% Flat</p>
                       </div>
+                    </div>
+                  </div>
+                  
+                  {/* Developer Coupon Section */}
+                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-8 rounded-3xl border border-purple-100 shadow-sm">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <SafeIcon icon={FiGift} className="text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-navy">Developer Coupon</h3>
+                        <p className="text-sm text-gray-500">Have a dev/staging code? Apply it here</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="Enter coupon code (e.g., PRO_STAGE)"
+                        className="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono uppercase"
+                        disabled={couponLoading}
+                      />
+                      <button
+                        onClick={handleApplyCoupon}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                      >
+                        {couponLoading ? (
+                          <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                        ) : (
+                          <>
+                            <SafeIcon icon={FiCheck} />
+                            Apply
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    
+                    {couponMessage.text && (
+                      <div className={`mt-4 p-3 rounded-xl text-sm font-medium ${
+                        couponMessage.type === 'success' 
+                          ? 'bg-green-100 text-green-700 border border-green-200' 
+                          : 'bg-red-100 text-red-700 border border-red-200'
+                      }`}>
+                        {couponMessage.text}
+                      </div>
+                    )}
+                    
+                    <div className="mt-4 p-4 bg-white/50 rounded-xl border border-purple-100">
+                      <p className="text-xs text-gray-500 font-medium">
+                        <span className="font-black text-purple-600">Available Dev Codes:</span>
+                      </p>
+                      <ul className="mt-2 space-y-1 text-xs text-gray-500">
+                        <li><code className="bg-gray-100 px-2 py-0.5 rounded font-mono">PRO_STAGE</code> → Upgrade to Professional tier</li>
+                        <li><code className="bg-gray-100 px-2 py-0.5 rounded font-mono">TEAM_STAGE</code> → Upgrade to Teams tier</li>
+                      </ul>
                     </div>
                   </div>
                 </div>

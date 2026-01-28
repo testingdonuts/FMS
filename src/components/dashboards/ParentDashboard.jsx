@@ -12,6 +12,7 @@ import { bookingService } from '../../services/bookingService';
 import { chatService } from '../../services/chatService';
 import { serviceManagementService } from '../../services/serviceManagementService';
 import ChatWindow from '../chat/ChatWindow';
+import NotificationBell from '../notifications/NotificationBell';
 import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 
@@ -229,7 +230,10 @@ const ParentDashboard = () => {
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 h-20 flex items-center justify-between px-8 z-10">
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"><SafeIcon icon={FiMenu} className="text-2xl" /></button>
           <h1 className="text-xl font-black text-navy">{tabs.find(t => t.id === activeTab)?.label}</h1>
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><SafeIcon icon={FiUser} className="text-xl" /></div>
+          <div className="flex items-center space-x-3">
+            <NotificationBell />
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><SafeIcon icon={FiUser} className="text-xl" /></div>
+          </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-gray-50/50">
