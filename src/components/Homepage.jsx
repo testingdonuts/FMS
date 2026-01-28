@@ -12,7 +12,7 @@ import * as FiIcons from 'react-icons/fi';
 import { listingService } from '../services/listingService';
 import { serviceManagementService } from '../services/serviceManagementService';
 import { equipmentService } from '../services/equipmentService';
-import { useAuth } from '../hooks/useAuth.jsx';
+import { useAuth } from '../hooks/useAuth';
 import { useBooking } from '../context/BookingContext';
 import ServiceBookingForm from './bookings/ServiceBookingForm';
 import EquipmentRentalModal from './equipment/EquipmentRentalModal';
@@ -376,10 +376,7 @@ const Homepage = () => {
         isOpen={!!equipmentToRent}
         onClose={() => setEquipmentToRent(null)}
         equipment={equipmentToRent}
-        onRentalComplete={() => { 
-          setEquipmentToRent(null); 
-          alert('Equipment rental completed successfully!');
-        }}
+        onRentalComplete={() => { setEquipmentToRent(null); }}
         userId={user?.id}
       />
     </div>

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import DashboardRouter from './components/DashboardRouter';
 import Homepage from './components/Homepage';
 import TeamAcceptInvite from './components/team/TeamAcceptInvite';
-import { AuthProvider } from './hooks/useAuth.jsx';
+import { AuthProvider } from './hooks/useAuth';
 import { BookingProvider } from './context/BookingContext';
 import ServicesPage from './components/pages/ServicesPage';
 import EquipmentPage from './components/pages/EquipmentPage';

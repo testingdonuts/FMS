@@ -5,9 +5,7 @@ import * as FiIcons from 'react-icons/fi';
 import { equipmentService } from '../../services/equipmentService';
 import { serviceManagementService } from '../../services/serviceManagementService';
 import { calculatePlatformFee } from '../../utils/feeUtils';
-import { useAuth } from '../../hooks/useAuth.jsx';
-import AddressAutocomplete from '../listings/AddressAutocomplete';
-import supabase from '../../supabase/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
 const { FiX, FiCalendar, FiDollarSign, FiInfo, FiCreditCard, FiCheck, FiMessageSquare, FiAlertCircle, FiUser, FiPhone, FiMapPin, FiArrowRight } = FiIcons;
 
@@ -86,13 +84,21 @@ const EquipmentRentalModal = ({ isOpen, onClose, equipment, onRentalComplete, us
   };
 
   const checkAvailability = async () => {
-    // Availability check removed - equipment is always available
-    setAvailability(true);
-    setError('');
-  };
-
-  const handleAddressSelect = (addressData) => {
-    setFormData(prev => ({ ...prev, parentAddress: addressData.address }));
+    if (!equipment || !formData.startDate || !formData.endDate) return;
+    setCheckingAvailability(true);
+    const { data, error } = await equipmentService.checkAvailability(
+      equipment.id,
+      formData.startDate,
+      formData.endDate
+    );
+    if (error) {
+      setError('Error checking availability');
+    } else {
+      setAvailability(data);
+      if (!data) setError('Equipment is not available for these dates');
+      else setError('');
+    }
+    setCheckingAvailability(false);
   };
 
   const handleInputChange = (e) => {
@@ -111,7 +117,10 @@ const EquipmentRentalModal = ({ isOpen, onClose, equipment, onRentalComplete, us
         setError('End date must be after start date');
         return;
       }
-      // Availability check removed - equipment is always available
+      if (!availability) {
+        setError('Equipment is not available for selected dates');
+        return;
+      }
     }
     if (step === 2) {
       if (!formData.parentFirstName || !formData.parentLastName || !formData.contactPhone || !formData.parentAddress) {
@@ -126,40 +135,28 @@ const EquipmentRentalModal = ({ isOpen, onClose, equipment, onRentalComplete, us
     setLoading(true);
     setError('');
     try {
-      // Use correct column names based on actual schema
       const rentalData = {
-        equipment_id: equipment.id,
-        parent_id: userId,
-        start_date: formData.startDate,
-        end_date: formData.endDate,
-        total_price: pricing.totalPrice,
-        platform_fee: pricing.platformFee,
-        deposit_amount: pricing.depositAmount,
+        equipmentId: equipment.id,
+        organizationId: equipment.organization_id,
+        renterId: userId,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        totalPrice: pricing.totalPrice,
+        platformFee: pricing.platformFee,
+        depositAmount: pricing.depositAmount,
         status: 'pending',
-        pickup_address: formData.parentAddress,
-        return_method: 'pickup',
-        parent_first_name: formData.parentFirstName,
-        parent_last_name: formData.parentLastName,
-        contact_phone: formData.contactPhone,
-        parent_address: formData.parentAddress,
-        notes: formData.notes
+        notes: formData.notes,
+        parentFirstName: formData.parentFirstName,
+        parentLastName: formData.parentLastName,
+        contactPhone: formData.contactPhone,
+        parentAddress: formData.parentAddress
       };
 
-      const { data, error: submitError } = await supabase
-        .from('equipment_rentals')
-        .insert([rentalData])
-        .select()
-        .single();
+      const { data, error: submitError } = await equipmentService.createRental(rentalData);
 
       if (submitError) {
-        console.log('Rental creation error details:', submitError);
-        console.log('Rental data being sent:', rentalData);
-        const errorMessage = typeof submitError === 'string' 
-          ? submitError 
-          : submitError?.message || 'Failed to create rental. Please try again.';
-        setError(errorMessage);
+        setError(submitError);
       } else {
-        console.log('Rental created successfully:', data);
         setStep(4);
         setTimeout(() => {
           onRentalComplete(data);
@@ -168,8 +165,7 @@ const EquipmentRentalModal = ({ isOpen, onClose, equipment, onRentalComplete, us
         }, 2500);
       }
     } catch (err) {
-      console.error('handleSubmitRental error:', err);
-      setError(err?.message || 'Failed to create rental. Please try again.');
+      setError('Failed to create rental. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -177,23 +173,7 @@ const EquipmentRentalModal = ({ isOpen, onClose, equipment, onRentalComplete, us
 
   const resetModal = () => {
     setStep(1);
-    setFormData({
-      startDate: '',
-      endDate: '',
-      notes: '',
-      parentFirstName: '',
-      parentLastName: '',
-      contactPhone: '',
-      parentAddress: ''
-    });
-    setPricing({ 
-      dailyRate: 0, 
-      totalDays: 0, 
-      totalPrice: 0, 
-      platformFee: 0, 
-      depositAmount: 0 
-    });
-    setAvailability(true);
+    setFormData(prev => ({ ...prev, startDate: '', endDate: '', notes: '' }));
     setError('');
   };
 
@@ -288,13 +268,8 @@ const EquipmentRentalModal = ({ isOpen, onClose, equipment, onRentalComplete, us
                   <div className="space-y-2">
                     <label className="text-xs font-black text-navy uppercase tracking-widest">Home Address</label>
                     <div className="relative">
-                      <AddressAutocomplete
-                        value={formData.parentAddress}
-                        onChange={(value) => setFormData(prev => ({ ...prev, parentAddress: value }))}
-                        onSelect={handleAddressSelect}
-                        placeholder="Search for your address..."
-                        className="w-full"
-                      />
+                      <SafeIcon icon={FiMapPin} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="text" name="parentAddress" value={formData.parentAddress} onChange={handleInputChange} placeholder="Street, City, State, ZIP" className="w-full pl-10 p-4 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" required />
                     </div>
                   </div>
 

@@ -5,7 +5,7 @@ import React,{useState,useEffect} from 'react';
     import {equipmentService} from '../../services/equipmentService';
     import EquipmentCard from './EquipmentCard';
     import EquipmentRentalModal from './EquipmentRentalModal';
-    import {useAuth} from '../../hooks/useAuth.jsx';
+    import {useAuth} from '../../hooks/useAuth';
     import {useBooking} from '../../context/BookingContext';
     const {FiSearch,FiFilter,FiPackage,FiDollarSign}=FiIcons;
     const EquipmentBrowse=()=> {
@@ -88,12 +88,9 @@ import React,{useState,useEffect} from 'react';
     };
     const handleRentalComplete=(rental)=> {
     console.log('Rental completed:',rental);
-    // Close modal and reset selection
-    setShowRentalModal(false);
-    setSelectedEquipment(null);
-    // Optionally show success message
-    alert('Equipment rental completed successfully!');
-  };
+    // Optionally reload equipment to update availability
+    loadEquipment();
+    };
     return (
      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
      <div className="space-y-6">

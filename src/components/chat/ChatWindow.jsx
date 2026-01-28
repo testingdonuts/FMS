@@ -12,28 +12,16 @@ const ChatWindow = ({ currentUser, recipient, orgId, context = {}, onClose, onMe
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef();
 
-  const doesMessageMatchThread = (msg) => {
-    const bookingId = context?.bookingId || null;
-    const serviceId = context?.serviceId || null;
-    const equipmentId = context?.equipmentId || null;
-
-    // If we are in a specific thread (booking/service/equipment), only show messages in that thread.
-    // If no context is provided, this is a general thread.
-    return (msg.booking_id || null) === bookingId &&
-      (msg.service_id || null) === serviceId &&
-      (msg.equipment_id || null) === equipmentId;
-  };
-
   useEffect(() => {
     loadMessages();
     const subscription = chatService.subscribeToMessages(currentUser.id, (msg) => {
       // Only add if it belongs to this specific conversation context/recipient
-      if (msg.sender_id === recipient.id && doesMessageMatchThread(msg)) {
+      if (msg.sender_id === recipient.id) {
         setMessages(prev => [...prev, msg]);
       }
     });
     return () => subscription.unsubscribe();
-  }, [currentUser.id, recipient.id, context.bookingId, context.serviceId, context.equipmentId]);
+  }, [recipient.id, context.bookingId]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });

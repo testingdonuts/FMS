@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
@@ -16,7 +15,6 @@ const {
 } = FiIcons;
 
 const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('equipment');
   const [equipment, setEquipment] = useState([]);
   const [rentals, setRentals] = useState([]);
@@ -27,7 +25,6 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
   const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [rentalIdFilter, setRentalIdFilter] = useState(null);
 
   const pendingRentalsCount = rentals.filter(r => r.status === 'pending').length;
 
@@ -45,25 +42,11 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
 
   useEffect(() => {
     if (organizationId) {
-      console.log('[EquipmentManagement] Effect triggered - activeTab:', activeTab, 'orgId:', organizationId);
       loadRentals();
       if (activeTab === 'equipment') loadEquipment();
       else if (activeTab === 'maintenance') loadMaintenance();
     }
   }, [activeTab, organizationId]);
-
-  // Deep link handling: equipmentId/rentalId
-  useEffect(() => {
-    const eq = searchParams.get('equipmentId');
-    const rental = searchParams.get('rentalId');
-    if (eq) {
-      setActiveTab('equipment');
-      setSearchQuery(eq);
-    } else if (rental) {
-      setActiveTab('rentals');
-      setRentalIdFilter(rental);
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     filterEquipment();
@@ -72,17 +55,7 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
   const loadEquipment = async () => {
     setLoading(true);
     try {
-      console.log('[EquipmentManagement] Loading equipment for org:', organizationId);
-      if (!organizationId) {
-        console.error('[EquipmentManagement] No organizationId provided');
-        setEquipment([]);
-        return;
-      }
-      const { data, error } = await equipmentService.getOrganizationEquipment(organizationId);
-      console.log('[EquipmentManagement] Equipment result:', { data, error });
-      if (error) {
-        console.error('[EquipmentManagement] Error loading equipment:', error);
-      }
+      const { data } = await equipmentService.getOrganizationEquipment(organizationId);
       if (data) setEquipment(data);
     } finally {
       setLoading(false);
@@ -93,19 +66,7 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
     if (activeTab === 'rentals') setLoading(true);
     try {
       const { data } = await equipmentService.getOrganizationRentals(organizationId);
-      if (data) {
-        let list = data;
-        if (rentalIdFilter) {
-          list = [...data].sort((a, b) => (a.id === rentalIdFilter ? -1 : b.id === rentalIdFilter ? 1 : 0));
-        }
-        setRentals(list);
-        if (rentalIdFilter) {
-          setTimeout(() => {
-            const el = document.getElementById(`rental-row-${rentalIdFilter}`);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 100);
-        }
-      }
+      if (data) setRentals(data);
     } finally {
       setLoading(false);
     }
@@ -199,6 +160,7 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
               <SafeIcon icon={FiInfo} />
             </div>
             <div>
+              <p className="font-black text-navy">Pending Confirmations</p>
               <p className="text-sm text-blue-700">You have {pendingRentalsCount} equipment rental request(s) waiting for your approval.</p>
             </div>
           </div>
@@ -213,30 +175,12 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
       {loading ? (
         <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 animate-pulse">
           <div className="animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-500 font-bold">Loading rental records...</p>
         </div>
       ) : rentals.length > 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              {rentalIdFilter && (
-                <caption className="caption-top p-3">
-                  <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-xl text-yellow-800 flex items-center justify-between">
-                    <span className="text-sm font-bold">Filtering to rental: {rentalIdFilter}</span>
-                    <button
-                      className="text-sm font-bold underline"
-                      onClick={() => {
-                        setRentalIdFilter(null);
-                        const sp = new URLSearchParams(searchParams);
-                        sp.delete('rentalId');
-                        setSearchParams(sp, { replace: true });
-                        loadRentals();
-                      }}
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </caption>
-              )}
               <thead className="bg-gray-50/50 border-b border-gray-100">
                 <tr>
                   <th className="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Equipment</th>
@@ -248,7 +192,7 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {rentals.map(rental => (
-                  <tr id={`rental-row-${rental.id}`} key={rental.id} className={`transition-colors ${rental.id === rentalIdFilter ? 'bg-blue-50 ring-1 ring-blue-200' : 'hover:bg-gray-50/50'}`}>
+                  <tr key={rental.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <p className="font-bold text-navy text-sm">{rental.equipment?.name}</p>
                       <p className="text-[10px] text-blue-600 font-bold uppercase">{rental.equipment?.category}</p>
@@ -261,6 +205,8 @@ const EquipmentManagement = ({ organizationId, userRole = 'organization' }) => {
                         <SafeIcon icon={FiPhone} className="mr-1 text-[10px]" />
                         {rental.contact_phone || 'N/A'}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex flex-col space-y-1">
                         <div className="flex items-center text-xs text-gray-700 font-medium">
                           <SafeIcon icon={FiCalendar} className="mr-1.5 text-blue-500" />

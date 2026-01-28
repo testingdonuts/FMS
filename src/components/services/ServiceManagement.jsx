@@ -38,6 +38,7 @@ import React, { useState, useEffect } from 'react';
 
       const filterServices = () => {
         let filtered = [...services];
+
         if (searchQuery) {
           filtered = filtered.filter(
             (service) =>
@@ -46,6 +47,7 @@ import React, { useState, useEffect } from 'react';
               service.service_type.toLowerCase().includes(searchQuery.toLowerCase())
           );
         }
+
         if (statusFilter !== 'all') {
           filtered = filtered.filter((service) => {
             switch (statusFilter) {
@@ -58,6 +60,7 @@ import React, { useState, useEffect } from 'react';
             }
           });
         }
+
         setFilteredServices(filtered);
       };
 
@@ -72,28 +75,24 @@ import React, { useState, useEffect } from 'react';
             service_type: formData.serviceType,
             is_active: formData.isActive,
             image_url: formData.image_url,
-            availability: formData.availability,
           };
 
           if (selectedService) {
-            const { error } = await serviceManagementService.updateService(
-              selectedService.id,
-              servicePayload
-            );
+            const { error } = await serviceManagementService.updateService(selectedService.id, servicePayload);
             if (error) {
               alert('Error updating service: ' + error);
               setLoading(false);
               return;
             }
           } else {
-            const payloadWithOrg = { ...servicePayload, organization_id: organizationId };
-            const { error } = await serviceManagementService.createService(payloadWithOrg);
+            const { error } = await serviceManagementService.createService(servicePayload, organizationId);
             if (error) {
               alert('Error creating service: ' + error);
               setLoading(false);
               return;
             }
           }
+
           await loadServices();
           setShowForm(false);
           setSelectedService(null);
@@ -103,7 +102,6 @@ import React, { useState, useEffect } from 'react';
         }
         setLoading(false);
       };
-
 
       const handleEditService = (service) => {
         setSelectedService(service);
@@ -146,12 +144,11 @@ import React, { useState, useEffect } from 'react';
 
       const getServiceStats = () => {
         const total = services.length;
-        const active = services.filter((s) => s.is_active).length;
-        const inactive = services.filter((s) => !s.is_active).length;
-        const avgPrice =
-          services.length > 0
-            ? services.reduce((sum, s) => sum + parseFloat(s.price), 0) / services.length
-            : 0;
+        const active = services.filter(s => s.is_active).length;
+        const inactive = services.filter(s => !s.is_active).length;
+        const avgPrice = services.length > 0
+          ? services.reduce((sum, s) => sum + parseFloat(s.price), 0) / services.length
+          : 0;
 
         return { total, active, inactive, avgPrice };
       };
@@ -275,9 +272,7 @@ import React, { useState, useEffect } from 'react';
                 {services.length === 0 ? 'No services yet' : 'No services match your filters'}
               </h3>
               <p className="text-gray-500 mb-6">
-                {services.length === 0
-                  ? 'Add your first service to start accepting bookings'
-                  : 'Try adjusting your search or filter criteria'}
+                {services.length === 0 ? 'Add your first service to start accepting bookings' : 'Try adjusting your search or filter criteria'}
               </p>
               {services.length === 0 && userRole === 'organization' && (
                 <motion.button

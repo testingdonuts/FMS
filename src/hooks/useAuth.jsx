@@ -65,7 +65,8 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password, userData = {}) => {
     if (userData.role === 'team_member') {
-      const { data, error } = await teamService.acceptInvitation(userData.inviteCode, {
+      const { data, error } = await teamService.registerWithInvite(userData.inviteCode, {
+        email,
         password,
         fullName: userData.fullName,
         phone: userData.phone,

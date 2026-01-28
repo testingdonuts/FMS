@@ -5,7 +5,7 @@ import * as FiIcons from 'react-icons/fi';
 import { listingService } from '../../services/listingService';
 import { serviceManagement } from '../../services/serviceManagement';
 import { equipmentService } from '../../services/equipmentService';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../hooks/useAuth';
 
 const { 
   FiEdit3, FiTrash2, FiPlus, FiSettings, FiPackage, 

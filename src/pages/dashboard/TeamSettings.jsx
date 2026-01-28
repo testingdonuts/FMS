@@ -6,7 +6,7 @@ import SafeIcon from '../../common/SafeIcon';
 import TeamMembers from '../../components/teams/TeamMembers';
 import TeamInvites from '../../components/teams/TeamInvites';
 import PlanBilling from '../../components/teams/PlanBilling';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../hooks/useAuth';
 
 const { FiUsers, FiMail, FiCreditCard, FiMapPin, FiSettings } = FiIcons;
 

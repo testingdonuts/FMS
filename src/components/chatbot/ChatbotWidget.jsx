@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { aiChatService } from '../../services/aiChatService';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../hooks/useAuth';
 
 const { FiMessageCircle, FiX, FiSend, FiUser, FiCpu, FiInfo, FiShield } = FiIcons;
 

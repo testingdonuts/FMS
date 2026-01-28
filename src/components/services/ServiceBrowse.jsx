@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { serviceManagementService } from '../../services/serviceManagementService';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../hooks/useAuth';
 import { useBooking } from '../../context/BookingContext';
 import ServiceBookingForm from '../bookings/ServiceBookingForm';
 

@@ -7,7 +7,7 @@ import * as FiIcons from 'react-icons/fi';
 import { listingService } from '../../services/listingService';
 import { serviceManagementService } from '../../services/serviceManagementService';
 import { equipmentService } from '../../services/equipmentService';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../hooks/useAuth';
 import ChatWindow from '../chat/ChatWindow';
 
 const { 

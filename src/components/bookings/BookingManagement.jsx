@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
@@ -10,12 +9,10 @@ import ServiceBookingForm from './ServiceBookingForm';
 import BookingCard from './BookingCard';
 import BookingFilterBar from './BookingFilterBar';
 import CalendarView from '../calendar/CalendarView';
-import supabase from '../../supabase/supabase';
 
 const { FiPlus, FiCalendar, FiList, FiBarChart, FiDownload, FiAlertCircle } = FiIcons;
 
 const BookingManagement = ({ organizationId, userId, userRole, onChat }) => {
-  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('bookings');
   const [viewMode, setViewMode] = useState('list');
   const [bookings, setBookings] = useState([]);
@@ -42,14 +39,6 @@ const BookingManagement = ({ organizationId, userId, userRole, onChat }) => {
     }
   }, [organizationId, userId, userRole]);
 
-  // Apply deep link for specific booking (?bookingId=...)
-  useEffect(() => {
-    const deepId = searchParams.get('bookingId');
-    if (deepId) {
-      setFilters(prev => ({ ...prev, search: deepId }));
-    }
-  }, [searchParams]);
-
   useEffect(() => {
     applyFilters();
   }, [bookings, filters]);
@@ -57,27 +46,21 @@ const BookingManagement = ({ organizationId, userId, userRole, onChat }) => {
   const loadData = async () => {
     setLoading(true);
     setFetchError(null);
+    const filterParams = { ...(userRole === 'parent' ? { parentId: userId } : { organizationId }) };
     
     // Ensure we don't make a request with undefined parameters
-    if (!userId && !organizationId) {
+    if (!filterParams.parentId && !filterParams.organizationId) {
       setLoading(false);
       return;
     }
 
-    try {
-      let data;
-      if (userRole === 'parent' && userId) {
-        data = await bookingService.getParentBookings(userId);
-      } else if (organizationId) {
-        data = await supabase.rpc('get_organization_bookings', { p_org_id: organizationId });
-      }
-      
-      if (data?.data) {
-        setBookings(data.data);
-      }
-    } catch (error) {
+    const { data, error } = await bookingService.getServiceBookings(filterParams);
+    
+    if (data) {
+      setBookings(data);
+    } else if (error) {
       console.error("Error fetching bookings:", error);
-      setFetchError(error.message || 'Failed to load bookings');
+      setFetchError(error);
     }
     setLoading(false);
   };

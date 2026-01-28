@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import { useAuth } from '../../hooks/useAuth.jsx';
+import { useAuth } from '../../hooks/useAuth';
 import { bookingService } from '../../services/bookingService';
 import { serviceManagementService } from '../../services/serviceManagementService';
 import EquipmentManagement from '../equipment/EquipmentManagement';
 import BookingManagement from '../bookings/BookingManagement';
-import TaskList from '../tasks/TaskList';
-import { taskService } from '../../services/taskService';
 import ChatWindow from '../chat/ChatWindow';
-import NotificationBell from '../notifications/NotificationBell';
 import { supabase } from '../../lib/supabase';
 import { format } from 'date-fns';
 
@@ -22,7 +19,6 @@ const {
 } = FiIcons;
 
 const TeamMemberDashboard = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('profile');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,7 +28,6 @@ const TeamMemberDashboard = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [profileData, setProfileData] = useState({ fullName: '', phone: '' });
   const [organizationName, setOrganizationName] = useState('');
-  const [tasks, setTasks] = useState([]);
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: FiUser },
@@ -50,44 +45,6 @@ const TeamMemberDashboard = () => {
     }
   }, [profile, user]);
 
-  // Read tab from URL for deep-linking
-  useEffect(() => {
-    const t = searchParams.get('tab');
-    if (t && ['profile','schedule','bookings','messages','equipment','training','tasks'].includes(t)) {
-      setActiveTab(t);
-    }
-  }, [searchParams]);
-
-  // Keep tab in URL in sync
-  useEffect(() => {
-    const current = searchParams.get('tab');
-    if (current !== activeTab) {
-      const sp = new URLSearchParams(searchParams);
-      sp.set('tab', activeTab);
-      setSearchParams(sp, { replace: true });
-    }
-  }, [activeTab]);
-  useEffect(() => {
-    if ((activeTab === 'tasks' || activeTab === 'schedule') && user?.id) {
-      loadMyTasks();
-    }
-  }, [activeTab, user?.id]);
-
-  const loadMyTasks = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await taskService.getMyTasks(user.id);
-      if (error) throw new Error(error);
-      setTasks(data);
-    } catch (e) {
-      console.error('Failed to load tasks:', e);
-      setTasks([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
   useEffect(() => {
     if (profile) {
       setProfileData({
@@ -98,48 +55,33 @@ const TeamMemberDashboard = () => {
   }, [profile]);
 
   const loadDashboardData = async () => {
-    if (!user?.id) return;
     setLoading(true);
-    try {
-      const [memberRes, orgRes] = await Promise.all([
-        supabase
-          .from('team_members')
-          .select('id, role')
-          .eq('user_id', user.id)
-          .single(),
-        profile?.organization_id
-          ? supabase
-              .from('organizations')
-              .select('name')
-              .eq('id', profile.organization_id)
-              .single()
-          : Promise.resolve({ data: null, error: null })
-      ]);
+    const { data: memberData } = await supabase
+      .from('team_members')
+      .select('id, role')
+      .eq('user_id', user.id)
+      .single();
 
-      const memberData = memberRes?.data || null;
-      if (memberData) setTeamMemberDetails(memberData);
+    if (memberData) setTeamMemberDetails(memberData);
 
-      const orgData = orgRes?.data || null;
-      if (orgData?.name) setOrganizationName(orgData.name);
-
-      const bookingsRes = await bookingService.getServiceBookings({
-        organizationId: profile?.organization_id,
-      });
-      if (bookingsRes?.error) throw bookingsRes.error;
-
-      const bookingsData = bookingsRes?.data || [];
-      if (memberData) {
-        const myBookings = bookingsData.filter(b => b.technician_id === memberData.id);
-        setAssignedBookings(myBookings.sort((a, b) => new Date(a.booking_date) - new Date(b.booking_date)));
-      } else {
-        setAssignedBookings([]);
-      }
-    } catch (error) {
-      console.error('Team member dashboard load error:', error);
-      setAssignedBookings([]);
-    } finally {
-      setLoading(false);
+    if (profile?.organization_id) {
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('name')
+        .eq('id', profile.organization_id)
+        .single();
+      if (orgData) setOrganizationName(orgData.name);
     }
+
+    const { data: bookingsData } = await bookingService.getServiceBookings({
+      organizationId: profile.organization_id,
+    });
+
+    if (bookingsData && memberData) {
+      const myBookings = bookingsData.filter(b => b.technician_id === memberData.id);
+      setAssignedBookings(myBookings.sort((a,b) => new Date(a.booking_date) - new Date(b.booking_date)));
+    }
+    setLoading(false);
   };
 
   const handleStartChat = (booking) => {
@@ -207,10 +149,9 @@ const TeamMemberDashboard = () => {
       </div>
 
       <div className="flex-1 lg:ml-0 overflow-y-auto h-screen">
-        <header className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-8">
+        <header className="bg-white shadow-sm border-b h-16 flex items-center px-8">
            <button onClick={() => setSidebarOpen(true)} className="lg:hidden mr-4"><SafeIcon icon={FiMenu} className="text-xl" /></button>
            <h1 className="text-2xl font-bold text-gray-900">{tabs.find(t => t.id === activeTab)?.label}</h1>
-           <NotificationBell />
         </header>
 
         <div className="p-8">
@@ -225,150 +166,20 @@ const TeamMemberDashboard = () => {
             </div>
           )}
           {activeTab === 'schedule' && (
-            <div className="space-y-6">
-              {/* Today's Summary */}
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-blue-600">
-                    {assignedBookings.filter(b => {
-                      const bookingDate = new Date(b.booking_date).toDateString();
-                      return bookingDate === new Date().toDateString();
-                    }).length}
-                  </p>
-                  <p className="text-sm text-blue-700 font-medium">Bookings Today</p>
-                </div>
-                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-purple-600">
-                    {tasks.filter(t => t.status !== 'done' && t.due_date && new Date(t.due_date).toDateString() === new Date().toDateString()).length}
-                  </p>
-                  <p className="text-sm text-purple-700 font-medium">Tasks Due Today</p>
-                </div>
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-green-600">
-                    {assignedBookings.filter(b => {
-                      const bookingDate = new Date(b.booking_date);
-                      const today = new Date();
-                      return bookingDate > today;
-                    }).length}
-                  </p>
-                  <p className="text-sm text-green-700 font-medium">Upcoming Bookings</p>
-                </div>
-              </div>
-
-              {/* Today's Bookings */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="font-bold text-navy text-lg mb-4 flex items-center gap-2">
-                  <SafeIcon icon={FiCalendar} className="text-blue-600" />
-                  Today's Appointments
-                </h3>
-                {assignedBookings.filter(b => new Date(b.booking_date).toDateString() === new Date().toDateString()).length === 0 ? (
-                  <p className="text-gray-500 text-center py-6">No appointments scheduled for today</p>
-                ) : (
-                  <div className="space-y-3">
-                    {assignedBookings
-                      .filter(b => new Date(b.booking_date).toDateString() === new Date().toDateString())
-                      .map(b => (
-                        <div key={b.id} className="bg-blue-50 p-4 rounded-xl flex justify-between items-center">
-                          <div>
-                            <h4 className="font-bold text-navy">{b.service?.name || 'Service'}</h4>
-                            <p className="text-sm text-gray-600">{format(new Date(b.booking_date), 'p')} - {b.parent_first_name} {b.parent_last_name}</p>
-                            {b.location && <p className="text-xs text-gray-500 flex items-center gap-1 mt-1"><SafeIcon icon={FiMapPin} /> {b.location}</p>}
-                          </div>
-                          <button onClick={() => handleStartChat(b)} className="text-blue-600 hover:bg-blue-100 p-2 rounded-lg transition-colors">
-                            <SafeIcon icon={FiMessageSquare} />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Tasks Due Today */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="font-bold text-navy text-lg mb-4 flex items-center gap-2">
-                  <SafeIcon icon={FiCheckSquare} className="text-purple-600" />
-                  Tasks Due Today
-                </h3>
-                {tasks.filter(t => t.status !== 'done' && t.due_date && new Date(t.due_date).toDateString() === new Date().toDateString()).length === 0 ? (
-                  <p className="text-gray-500 text-center py-6">No tasks due today</p>
-                ) : (
-                  <div className="space-y-3">
-                    {tasks
-                      .filter(t => t.status !== 'done' && t.due_date && new Date(t.due_date).toDateString() === new Date().toDateString())
-                      .map(t => (
-                        <div key={t.id} className="bg-purple-50 p-4 rounded-xl flex justify-between items-center">
-                          <div>
-                            <h4 className="font-bold text-navy">{t.title}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className={`text-xs px-2 py-0.5 rounded font-bold uppercase ${
-                                t.priority === 'urgent' ? 'bg-red-100 text-red-700' :
-                                t.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                                'bg-gray-100 text-gray-600'
-                              }`}>{t.priority}</span>
-                              <span className="text-xs text-gray-500">{t.task_type?.replace('_', ' ')}</span>
-                            </div>
-                          </div>
-                          <button 
-                            onClick={async () => { await taskService.updateTask(t.id, { status: 'done' }); loadMyTasks(); }}
-                            className="text-green-600 hover:bg-green-100 p-2 rounded-lg transition-colors"
-                            title="Mark complete"
-                          >
-                            <SafeIcon icon={FiCheckSquare} />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Upcoming Bookings */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="font-bold text-navy text-lg mb-4 flex items-center gap-2">
-                  <SafeIcon icon={FiClock} className="text-green-600" />
-                  Upcoming Appointments
-                </h3>
-                {assignedBookings.filter(b => new Date(b.booking_date) > new Date()).length === 0 ? (
-                  <p className="text-gray-500 text-center py-6">No upcoming appointments</p>
-                ) : (
-                  <div className="space-y-3">
-                    {assignedBookings
-                      .filter(b => new Date(b.booking_date) > new Date())
-                      .slice(0, 5)
-                      .map(b => (
-                        <div key={b.id} className="bg-gray-50 p-4 rounded-xl flex justify-between items-center">
-                          <div>
-                            <h4 className="font-bold text-navy">{b.service?.name || 'Service'}</h4>
-                            <p className="text-sm text-gray-600">{format(new Date(b.booking_date), 'PPP p')}</p>
-                            <p className="text-xs text-gray-500">{b.parent_first_name} {b.parent_last_name}</p>
-                          </div>
-                          <button onClick={() => handleStartChat(b)} className="text-blue-600 hover:bg-blue-100 p-2 rounded-lg transition-colors">
-                            <SafeIcon icon={FiMessageSquare} />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            </div>
+             <div className="space-y-4">
+               {assignedBookings.map(b => (
+                 <div key={b.id} className="bg-white p-4 rounded-xl border border-gray-200 flex justify-between items-center">
+                    <div>
+                      <h4 className="font-bold text-navy">{b.service?.name}</h4>
+                      <p className="text-sm text-gray-500">{format(new Date(b.booking_date), 'PPP p')}</p>
+                    </div>
+                    <button onClick={() => handleStartChat(b)} className="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition-colors"><SafeIcon icon={FiMessageSquare} /></button>
+                 </div>
+               ))}
+             </div>
           )}
           {activeTab === 'bookings' && renderBookings()}
           {activeTab === 'equipment' && <EquipmentManagement organizationId={profile.organization_id} userRole="team_member" />}
-          {activeTab === 'tasks' && (
-            <div className="bg-white p-6 rounded-xl border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-navy">My Tasks</h3>
-                <button onClick={loadMyTasks} className="text-sm text-blue-600 font-bold">Refresh</button>
-              </div>
-              <TaskList
-                tasks={tasks}
-                isLoading={loading}
-                onUpdateStatus={async (id, status) => {
-                  await taskService.updateTask(id, { status });
-                  loadMyTasks();
-                }}
-              />
-            </div>
-          )}
           {activeTab === 'messages' && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
               {selectedChat ? (

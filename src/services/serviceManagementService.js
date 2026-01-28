@@ -1,100 +1,102 @@
 import { supabase } from '../lib/supabase';
 
-    // Using non-timestamped table names consistent with initial schema
-    const TABLES = {
-      SERVICES: 'services',
-      ORGANIZATIONS: 'organizations',
-      PROFILES: 'profiles'
+export const serviceManagementService = {
+  async testConnection() {
+    try {
+      const { data, error } = await supabase.from('services').select('id').limit(1);
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  async getAllOrganizations() {
+    const { data, error } = await supabase.from('organizations').select('*');
+    return { data, error: error?.message };
+  },
+
+  async getOrganizationById(organizationId) {
+    if (!organizationId) return { data: null, error: 'Organization ID is required.' };
+    const { data, error } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('id', organizationId)
+      .single();
+    return { data, error: error?.message };
+  },
+
+  async getOrganizationServices(organizationId) {
+    if (!organizationId) return { data: [], error: 'Organization ID is required.' };
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('organization_id', organizationId)
+      .order('created_at', { ascending: false });
+    return { data, error: error?.message };
+  },
+
+  async getActiveServices(organizationId = null) {
+    let query = supabase.from('services').select('*, organization:organizations(*)').eq('is_active', true);
+    if (organizationId) {
+      query = query.eq('organization_id', organizationId);
+    }
+    const { data, error } = await query;
+    return { data, error: error?.message };
+  },
+
+  async createService(serviceData, organizationId) {
+    const { data, error } = await supabase
+      .from('services')
+      .insert([{ ...serviceData, organization_id: organizationId }])
+      .select()
+      .single();
+    return { data, error: error?.message };
+  },
+
+  async updateService(serviceId, serviceData) {
+    const { data, error } = await supabase
+      .from('services')
+      .update(serviceData)
+      .eq('id', serviceId)
+      .select()
+      .single();
+    return { data, error: error?.message };
+  },
+
+  async deleteService(serviceId) {
+    const { error } = await supabase.from('services').delete().eq('id', serviceId);
+    return { error: error?.message };
+  },
+
+  async toggleServiceStatus(serviceId, isActive) {
+    const { data, error } = await supabase
+      .from('services')
+      .update({ is_active: isActive })
+      .eq('id', serviceId)
+      .select()
+      .single();
+    return { data, error: error?.message };
+  },
+
+  async applyDevCoupon(organizationId, code) {
+    const coupons = {
+      'PRO_STAGE': 'Professional',
+      'TEAM_STAGE': 'Teams'
     };
 
-    export const serviceManagementService = {
-      async getOrganizationById(orgId) {
-        const { data, error } = await supabase
-          .from(TABLES.ORGANIZATIONS)
-          .select('*')
-          .eq('id', orgId)
-          .single();
-        return { data, error: error?.message };
-      },
+    const targetTier = coupons[code.toUpperCase()];
+    if (!targetTier) {
+      return { error: 'Invalid or expired developer coupon code.' };
+    }
 
-      async getOrganizationByOwner(ownerId) {
-        const { data, error } = await supabase
-          .from(TABLES.ORGANIZATIONS)
-          .select('*')
-          .eq('owner_id', ownerId)
-          .single();
-        return { data, error: error?.message };
-      },
+    const { data, error } = await supabase
+      .from('organizations')
+      .update({ subscription_tier: targetTier })
+      .eq('id', organizationId)
+      .select()
+      .single();
 
-      async createService(serviceData) {
-        const { data, error } = await supabase
-          .from(TABLES.SERVICES)
-          .insert([serviceData])
-          .select()
-          .single();
-        return { data, error: error?.message };
-      },
-
-      async updateService(serviceId, updates) {
-        const { data, error } = await supabase
-          .from(TABLES.SERVICES)
-          .update(updates)
-          .eq('id', serviceId)
-          .select()
-          .single();
-        return { data, error: error?.message };
-      },
-
-      async deleteService(serviceId) {
-        const { error } = await supabase
-          .from(TABLES.SERVICES)
-          .delete()
-          .eq('id', serviceId);
-        return { error: error?.message };
-      },
-
-      async getServicesByOrgId(orgId) {
-        const { data, error } = await supabase
-          .from(TABLES.SERVICES)
-          .select('*')
-          .eq('organization_id', orgId)
-          .order('created_at', { ascending: false });
-        return { data, error: error?.message };
-      },
-      
-      async getOrganizationServices(orgId) {
-        return this.getServicesByOrgId(orgId);
-      },
-
-      async getActiveServices() {
-        const { data, error } = await supabase
-          .from(TABLES.SERVICES)
-          .select(`
-            *,
-            organization:organizations(name, address, zipcode)
-          `)
-          .eq('is_active', true)
-          .limit(20);
-        return { data, error: error?.message };
-      },
-
-      async toggleServiceStatus(serviceId, isActive) {
-        return this.updateService(serviceId, { is_active: isActive });
-      },
-      
-      async applyDevCoupon(orgId, code) {
-        // Mock implementation for dev coupons
-        let tier = 'Free';
-        if (code === 'PRO_STAGE') tier = 'Professional';
-        else if (code === 'TEAM_STAGE') tier = 'Teams';
-        else return { error: 'Invalid coupon code' };
-
-        const { data, error } = await supabase
-          .from(TABLES.ORGANIZATIONS)
-          .update({ subscription_tier: tier })
-          .eq('id', orgId)
-          .select()
-          .single();
-        return { data, error: error?.message };
-      }
-    };
+    return { data, error: error?.message };
+  }
+};

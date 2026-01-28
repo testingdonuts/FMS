@@ -47,25 +47,21 @@ export const teamService = {
           email: invitationData.email,
           role: invitationData.role,
           invited_by: invitationData.invitedBy,
-          status: 'pending',
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         },
       ])
       .select()
       .single();
 
-    if (error) {
-      console.error('Team invitation send error:', error);
-      return { data: null, error: error?.message || 'Failed to send invitation' };
-    }
-
-    return { data, error: null };
+    return { data, error: error?.message };
   },
 
   async getOrganizationInvitations(organizationId) {
     const { data, error } = await supabase
       .from('team_invites')
-      .select('*')
+      .select(`
+        *,
+        invited_by_profile:profiles!invited_by(full_name)
+      `)
       .eq('organization_id', organizationId)
       .order('created_at', { ascending: false });
 
@@ -73,43 +69,15 @@ export const teamService = {
   },
 
   async getTeamMembers(organizationId) {
-    // First get team members
-    const { data: members, error: membersError } = await supabase
+    const { data, error } = await supabase
       .from('team_members')
-      .select('*')
+      .select(`
+        *,
+        profile:profiles!user_id(*)
+      `)
       .eq('organization_id', organizationId);
 
-    if (membersError) {
-      return { data: [], error: membersError?.message };
-    }
-
-    // Then get profiles for these team members
-    if (members && members.length > 0) {
-      const userIds = members.map(m => m.user_id);
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, full_name, email')
-        .in('id', userIds);
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-      }
-
-      // Merge profiles into members (profiles.id matches team_members.user_id)
-      const profileMap = {};
-      profiles?.forEach(p => {
-        profileMap[p.id] = p;
-      });
-
-      const enrichedMembers = members.map(m => ({
-        ...m,
-        profile: profileMap[m.user_id] || null
-      }));
-
-      return { data: enrichedMembers, error: null };
-    }
-
-    return { data: members, error: null };
+    return { data, error: error?.message };
   },
 
   async removeTeamMember(memberId) {
