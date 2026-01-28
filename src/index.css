@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================
+   Base Styles
+   ========================================== */
 * {
   margin: 0;
   padding: 0;
@@ -9,12 +12,243 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
   width: 100%;
   height: 100%;
+}
+
+/* ==========================================
+   Accessibility Utilities
+   ========================================== */
+
+/* Screen reader only - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus visible styles for keyboard navigation */
+.focus-visible:focus,
+*:focus-visible {
+  outline: 2px solid #14b8a6;
+  outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #0D1B3E;
+  color: white;
+  padding: 8px 16px;
+  z-index: 100000;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0 0 8px 0;
+  transition: top 0.2s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-color: currentColor !important;
+  }
+  
+  button, a {
+    text-decoration: underline;
+  }
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================
+   Performance Optimizations
+   ========================================== */
+
+/* Enable GPU acceleration for animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Optimize image rendering */
+img {
+  content-visibility: auto;
+}
+
+/* Lazy load images below the fold */
+img[loading="lazy"] {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px 150px;
+}
+
+/* ==========================================
+   Custom Scrollbar (Optional)
+   ========================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* ==========================================
+   Form Accessibility
+   ========================================== */
+
+/* Required field indicator */
+label[data-required]::after {
+  content: " *";
+  color: #ef4444;
+}
+
+/* Error state */
+.input-error {
+  border-color: #ef4444 !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* Success state */
+.input-success {
+  border-color: #22c55e !important;
+}
+
+/* Disabled state */
+input:disabled,
+button:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ==========================================
+   Loading States
+   ========================================== */
+
+/* Skeleton loading animation */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f1f5f9 25%,
+    #e2e8f0 50%,
+    #f1f5f9 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Pulse animation */
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ==========================================
+   Print Styles
+   ========================================== */
+@media print {
+  /* Hide non-essential elements */
+  header,
+  footer,
+  nav,
+  .no-print,
+  button,
+  .cookie-consent {
+    display: none !important;
+  }
+
+  /* Reset colors for printing */
+  body {
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  /* Ensure links are visible */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Page break control */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  table, figure, img {
+    page-break-inside: avoid;
+  }
 }
