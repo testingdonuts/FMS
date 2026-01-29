@@ -43,29 +43,7 @@ const Hero = () => {
     openNow: false,
     radius: 20,
   });
-  const locationInputRef = useRef(null);
-  const autocompleteRef = useRef(null);
 
-  useEffect(() => {
-    // Initialize Google Places Autocomplete
-    if (typeof window !== 'undefined' && window.google && locationInputRef.current && !autocompleteRef.current) {
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(locationInputRef.current, {
-        types: ['(regions)'], // Cities, postcodes, regions
-        fields: ['formatted_address', 'geometry', 'address_components']
-      });
-      
-      autocompleteRef.current.addListener('place_changed', () => {
-        const place = autocompleteRef.current.getPlace();
-        if (place.geometry) {
-          setLocation(place.formatted_address || place.name);
-          setCoordinates({
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
-          });
-        }
-      });
-    }
-  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
