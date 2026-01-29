@@ -48,9 +48,6 @@ export const aiChatService = {
 
   async getResponse(query, userRole = 'parent') {
     const lowercaseQuery = query.toLowerCase();
-    
-    // Debug log
-    console.log('[Safety Assistant] Processing query:', lowercaseQuery, 'Role:', userRole);
 
     // --- PHASE 1: CUSTOM SEMANTIC INTENT LOGIC (High Priority) ---
     
