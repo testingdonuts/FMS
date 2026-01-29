@@ -1,27 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiSearch, FiMapPin, FiChevronDown } = FiIcons;
+const { FiSearch, FiMapPin } = FiIcons;
 
 const Hero = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    location: '',
-    type: 'Technician'
-  });
+  const [location, setLocation] = useState('');
+  const [coordinates, setCoordinates] = useState(null);
+  const locationInputRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
+  useEffect(() => {
+    // Initialize Google Places Autocomplete
+    if (typeof window !== 'undefined' && window.google && locationInputRef.current && !autocompleteRef.current) {
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(locationInputRef.current, {
+        types: ['(regions)'], // Cities, postcodes, regions
+        fields: ['formatted_address', 'geometry', 'address_components']
+      });
+      
+      autocompleteRef.current.addListener('place_changed', () => {
+        const place = autocompleteRef.current.getPlace();
+        if (place.geometry) {
+          setLocation(place.formatted_address || place.name);
+          setCoordinates({
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng()
+          });
+        }
+      });
+    }
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const path = formData.type === 'Technician' ? '/listings' : 
-                 formData.type === 'Service' ? '/services' : '/equipment';
-    
     const params = new URLSearchParams();
-    if (formData.location) params.append('loc', formData.location);
+    if (location) params.append('loc', location);
+    if (coordinates) {
+      params.append('lat', coordinates.lat);
+      params.append('lng', coordinates.lng);
+    }
+    params.append('radius', '20'); // Default 20km radius
     
-    navigate(`${path}?${params.toString()}`);
+    navigate(`/listings?${params.toString()}`);
   };
 
   return (
@@ -49,43 +72,33 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto"
         >
-          Book installations, rent safety equipment, or connect with experts — anywhere.
+          Search by location to find certified technicians, safety services, and equipment rentals in your area.
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-10 max-w-3xl mx-auto bg-white p-4 rounded-xl shadow-2xl shadow-navy/10 border border-gray-100"
+          className="mt-10 max-w-2xl mx-auto bg-white p-3 rounded-2xl shadow-2xl shadow-navy/10 border border-gray-100"
         >
-          <form onSubmit={handleSearch} className="grid md:grid-cols-7 gap-2 items-center">
-            <div className="md:col-span-3 relative">
-              <SafeIcon icon={FiMapPin} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <form onSubmit={handleSearch} className="flex items-center gap-2">
+            <div className="flex-1 relative">
+              <SafeIcon icon={FiMapPin} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
+                ref={locationInputRef}
                 type="text"
-                placeholder="Enter location or zipcode..."
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500"
+                placeholder="Enter suburb, city, or postcode..."
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-teal-500 text-gray-800 placeholder-gray-400"
               />
-            </div>
-            <div className="md:col-span-3 relative">
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full appearance-none bg-white pr-8 pl-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500"
-              >
-                <option>Technician</option>
-                <option>Service</option>
-                <option>Equipment</option>
-              </select>
-              <SafeIcon icon={FiChevronDown} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
             <button
               type="submit"
-              className="md:col-span-1 w-full bg-teal-500 text-white font-semibold py-3 rounded-lg hover:bg-teal-600 transition-colors flex items-center justify-center"
+              className="bg-blue-600 text-white font-bold py-4 px-8 rounded-xl hover:bg-blue-700 transition-all flex items-center space-x-2 shadow-lg shadow-blue-600/20"
             >
               <SafeIcon icon={FiSearch} />
+              <span className="hidden sm:inline">Search Listings</span>
             </button>
           </form>
         </motion.div>

@@ -7,7 +7,7 @@ import * as FiIcons from 'react-icons/fi';
 // Added FiArrowRight to the destructuring list
 const { FiMapPin, FiPhone, FiClock, FiEdit, FiEye, FiTrash2, FiGlobe, FiStar, FiZap, FiArrowRight } = FiIcons;
 
-const ListingCard = ({ listing, onEdit, onDelete, onView, showActions = true }) => {
+const ListingCard = ({ listing, onEdit, onDelete, onView, showActions = true, distance = null }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'published': return 'bg-green-100 text-green-700';
@@ -62,10 +62,15 @@ const ListingCard = ({ listing, onEdit, onDelete, onView, showActions = true }) 
           </div>
         )}
 
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
           <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${getStatusColor(listing.status)}`}>
             {listing.status}
           </span>
+          {distance !== null && (
+            <span className="bg-teal/90 text-white px-3 py-1.5 rounded-full text-[10px] font-black shadow-sm">
+              {distance.toFixed(1)} km
+            </span>
+          )}
         </div>
 
         {listing.price_range && (

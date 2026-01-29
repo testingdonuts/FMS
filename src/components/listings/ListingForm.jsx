@@ -39,6 +39,8 @@ const ListingForm = ({ listing = null, onSave, onCancel, isLoading = false }) =>
     website: '',
     address: '',
     zipcode: '',
+    latitude: null,
+    longitude: null,
     status: 'draft',
     is_featured: false,
     offers_mobile_service: false,
@@ -80,12 +82,18 @@ const ListingForm = ({ listing = null, onSave, onCancel, isLoading = false }) =>
     if (typeof window !== 'undefined' && window.google && addressInputRef.current) {
       autocompleteRef.current = new window.google.maps.places.Autocomplete(addressInputRef.current, {
         types: ['address'],
-        fields: ['formatted_address', 'address_components']
+        fields: ['formatted_address', 'address_components', 'geometry']
       });
       autocompleteRef.current.addListener('place_changed', () => {
         const place = autocompleteRef.current.getPlace();
         if (place.formatted_address) {
-          setFormData(prev => ({ ...prev, address: place.formatted_address }));
+          const updates = { address: place.formatted_address };
+          // Capture latitude and longitude for location-based search
+          if (place.geometry?.location) {
+            updates.latitude = place.geometry.location.lat();
+            updates.longitude = place.geometry.location.lng();
+          }
+          setFormData(prev => ({ ...prev, ...updates }));
         }
       });
     }

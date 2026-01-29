@@ -87,8 +87,9 @@ export const aiChatService = {
     }
 
     // --- PHASE 2: DEEPSEEK LLM FALLBACK (DISABLED - Insufficient Balance) ---
-    // To re-enable: remove the `false &&` and ensure VITE_DEEPSEEK_API_KEY has credit
-    if (false && DEEPSEEK_CONFIG.apiKey && DEEPSEEK_CONFIG.apiKey !== 'sk-cccefde58ab24b39a1f725bf3b46f627_placeholder') {
+    // To re-enable: uncomment the block below and ensure VITE_DEEPSEEK_API_KEY has credit
+    /*
+    if (DEEPSEEK_CONFIG.apiKey && DEEPSEEK_CONFIG.apiKey !== 'sk-cccefde58ab24b39a1f725bf3b46f627_placeholder') {
       try {
         const response = await this.callDeepSeek(query, userRole);
         return { text: response, type: 'llm' };
@@ -97,6 +98,7 @@ export const aiChatService = {
         // Fall through to hardcoded fallback on error
       }
     }
+    */
 
     // --- PHASE 3: HARDCODED FALLBACK ---
     return {
