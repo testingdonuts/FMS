@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import AddressAutocomplete from '../listings/AddressAutocomplete';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import SafeIcon from '../../common/SafeIcon';
@@ -20,6 +21,16 @@ const MOBILE_SERVICE_OPTIONS = [
   { value: 'no', label: 'No' },
 ];
 
+
+const RADIUS_OPTIONS = [
+  { value: 10, label: '10 km' },
+  { value: 20, label: '20 km' },
+  { value: 50, label: '50 km' },
+  { value: 100, label: '100 km' },
+  { value: 200, label: '200 km' },
+  { value: 0, label: 'Anywhere' },
+];
+
 const Hero = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState('');
@@ -30,6 +41,7 @@ const Hero = () => {
     zipcode: '',
     mobileService: '',
     openNow: false,
+    radius: 20,
   });
   const locationInputRef = useRef(null);
   const autocompleteRef = useRef(null);
@@ -67,8 +79,7 @@ const Hero = () => {
     if (filters.zipcode) params.append('zipcode', filters.zipcode);
     if (filters.mobileService) params.append('mobile', filters.mobileService);
     if (filters.openNow) params.append('openNow', 'true');
-    params.append('radius', '20'); // Default 20km radius
-    
+    params.append('radius', filters.radius);
     navigate(`/listings?${params.toString()}`);
   };
 
@@ -94,7 +105,7 @@ const Hero = () => {
         />
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,35 +127,37 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-10 max-w-3xl mx-auto bg-white p-2 sm:p-3 rounded-2xl shadow-2xl shadow-navy/10 border border-gray-100"
+          className="mt-10 max-w-4xl mx-auto bg-white p-4 sm:p-5 rounded-2xl shadow-2xl shadow-navy/10 border border-gray-100"
         >
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch sm:items-center">
+          <form onSubmit={handleSearch} className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-0">
             {/* What are you looking for - Label + Dropdown */}
-            <div className="flex items-center gap-2 px-4 py-3 sm:py-0 border-b sm:border-b-0 sm:border-r border-gray-200 min-w-0">
+            <div className="flex items-center gap-3 px-5 py-4 lg:py-0 border-b lg:border-b-0 lg:border-r border-gray-200 shrink-0">
               <span className="text-sm text-gray-500 whitespace-nowrap">What are you looking for?</span>
               <div className="relative">
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="appearance-none bg-transparent pr-7 py-2 text-gray-800 font-medium focus:outline-none cursor-pointer border-none"
+                  className="appearance-none bg-transparent pr-8 py-2 text-gray-800 font-semibold focus:outline-none cursor-pointer border-none text-base"
                 >
                   {CATEGORY_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
-                <SafeIcon icon={FiChevronDown} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-4 h-4" />
+                <SafeIcon icon={FiChevronDown} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-5 h-5" />
               </div>
             </div>
 
             {/* Location Input */}
-            <div className="flex-1 relative flex items-center border-b sm:border-b-0 sm:border-r border-gray-200 px-4">
-              <input
-                ref={locationInputRef}
-                type="text"
-                placeholder="Address, city, postcode"
+            <div className="flex-1 relative flex items-center border-b lg:border-b-0 lg:border-r border-gray-200 px-5 min-w-[200px]">
+              <AddressAutocomplete
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full py-3 bg-transparent border-none focus:ring-0 focus:outline-none text-gray-800 placeholder-gray-400"
+                onChange={setLocation}
+                onSelect={(place) => {
+                  setLocation(place.address);
+                  setCoordinates({ lat: parseFloat(place.lat), lng: parseFloat(place.lon) });
+                }}
+                placeholder="Address, city, postcode"
+                className="bg-transparent border-none focus:ring-0 focus:outline-none text-gray-800 placeholder-gray-400 text-base"
               />
             </div>
 
@@ -152,7 +165,7 @@ const Hero = () => {
             <button
               type="button"
               onClick={() => setShowFilters(true)}
-              className="hidden sm:flex items-center justify-center w-12 h-12 rounded-xl hover:bg-gray-100 transition-colors text-gray-500"
+              className="hidden lg:flex items-center justify-center w-14 h-14 rounded-xl hover:bg-gray-100 transition-colors text-gray-500 shrink-0"
               title="More filters"
             >
               <SafeIcon icon={FiFilter} className="w-5 h-5" />
@@ -161,7 +174,7 @@ const Hero = () => {
             {/* Search Button */}
             <button
               type="submit"
-              className="bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 whitespace-nowrap"
+              className="bg-blue-500 text-white font-semibold py-4 px-8 rounded-xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 whitespace-nowrap shrink-0"
             >
               <SafeIcon icon={FiSearch} className="w-5 h-5" />
               <span>Search Listing</span>
@@ -200,6 +213,7 @@ const Hero = () => {
                   </button>
                 </div>
 
+
                 {/* Content */}
                 <div className="px-6 py-5 space-y-5">
                   {/* Zip/Post Code */}
@@ -224,6 +238,23 @@ const Hero = () => {
                         className="w-full appearance-none px-4 py-3 border-b border-gray-200 focus:border-blue-500 focus:outline-none transition-colors bg-transparent cursor-pointer pr-10"
                       >
                         {MOBILE_SERVICE_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                      <SafeIcon icon={FiChevronDown} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-5 h-5" />
+                    </div>
+                  </div>
+
+                  {/* Radius */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Search Radius</label>
+                    <div className="relative">
+                      <select
+                        value={filters.radius}
+                        onChange={e => setFilters(prev => ({ ...prev, radius: parseInt(e.target.value) }))}
+                        className="w-full appearance-none px-4 py-3 border-b border-gray-200 focus:border-blue-500 focus:outline-none transition-colors bg-transparent cursor-pointer pr-10"
+                      >
+                        {RADIUS_OPTIONS.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                       </select>
