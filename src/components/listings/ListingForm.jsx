@@ -397,15 +397,26 @@ const ListingForm = ({ listing = null, onSave, onCancel, isLoading = false }) =>
           <div className="flex space-x-3">
             <button type="button" onClick={onCancel} className="px-6 py-3 border-2 border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-white transition-all">Cancel</button>
             
+            {/* Save Progress Button - Always visible */}
+            <button 
+              type="button" 
+              onClick={() => onSave({ ...formData, status: 'draft' })}
+              disabled={isLoading || uploadingLogo || uploadingGallery} 
+              className="flex items-center justify-center space-x-2 px-6 py-3 bg-gray-600 text-white font-bold rounded-2xl shadow-lg hover:bg-gray-700 transition-all"
+            >
+              {isLoading ? <SafeIcon icon={FiLoader} className="animate-spin" /> : <SafeIcon icon={FiSave} />}
+              <span>Save Progress</span>
+            </button>
+            
             {activeTab === 'media' ? (
               <button 
                 type="button" 
-                onClick={() => onSave(formData)}
+                onClick={() => onSave({ ...formData, status: 'published' })}
                 disabled={isLoading || uploadingLogo || uploadingGallery} 
-                className={`flex items-center justify-center space-x-2 px-8 py-3 text-white font-bold rounded-2xl shadow-lg transition-all ${formData.status === 'published' ? 'bg-navy hover:bg-navy/90' : 'bg-gray-600 hover:bg-gray-700'}`}
+                className="flex items-center justify-center space-x-2 px-8 py-3 bg-green-600 text-white font-bold rounded-2xl shadow-lg hover:bg-green-700 transition-all"
               >
-                {isLoading ? <SafeIcon icon={FiLoader} className="animate-spin" /> : <SafeIcon icon={FiSave} />}
-                <span>{formData.status === 'published' ? 'Save & Publish' : 'Save as Draft'}</span>
+                {isLoading ? <SafeIcon icon={FiLoader} className="animate-spin" /> : <SafeIcon icon={FiCheck} />}
+                <span>Save & Publish</span>
               </button>
             ) : (
               <button 
