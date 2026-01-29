@@ -4,11 +4,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiSearch, FiMapPin } = FiIcons;
+const { FiSearch, FiMapPin, FiChevronDown, FiFilter } = FiIcons;
+
+const CATEGORY_OPTIONS = [
+  { value: '', label: 'All Categories' },
+  { value: 'installer', label: 'Installer/Techs' },
+  { value: 'retailer', label: 'Retailers' },
+  { value: 'rental', label: 'Equipment Rental' },
+  { value: 'training', label: 'Training Centers' },
+];
 
 const Hero = () => {
   const navigate = useNavigate();
   const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('installer');
   const [coordinates, setCoordinates] = useState(null);
   const locationInputRef = useRef(null);
   const autocompleteRef = useRef(null);
@@ -42,6 +51,7 @@ const Hero = () => {
       params.append('lat', coordinates.lat);
       params.append('lng', coordinates.lng);
     }
+    if (category) params.append('category', category);
     params.append('radius', '20'); // Default 20km radius
     
     navigate(`/listings?${params.toString()}`);
@@ -79,26 +89,54 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-10 max-w-2xl mx-auto bg-white p-3 rounded-2xl shadow-2xl shadow-navy/10 border border-gray-100"
+          className="mt-10 max-w-3xl mx-auto bg-white p-2 sm:p-3 rounded-2xl shadow-2xl shadow-navy/10 border border-gray-100"
         >
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
-            <div className="flex-1 relative">
-              <SafeIcon icon={FiMapPin} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            {/* What are you looking for - Label + Dropdown */}
+            <div className="flex items-center gap-3 px-4 py-3 sm:py-0 border-b sm:border-b-0 sm:border-r border-gray-200">
+              <span className="text-sm text-gray-500 whitespace-nowrap hidden md:inline">What are you looking for?</span>
+              <div className="relative flex-1 sm:flex-none">
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="appearance-none bg-transparent pr-8 py-2 text-gray-800 font-medium focus:outline-none cursor-pointer"
+                >
+                  {CATEGORY_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <SafeIcon icon={FiChevronDown} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Location Input */}
+            <div className="flex-1 relative flex items-center border-b sm:border-b-0 sm:border-r border-gray-200 px-2">
               <input
                 ref={locationInputRef}
                 type="text"
-                placeholder="Enter suburb, city, or postcode..."
+                placeholder="Address, city, postcode"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-teal-500 text-gray-800 placeholder-gray-400"
+                className="w-full py-3 px-2 bg-transparent border-none focus:ring-0 focus:outline-none text-gray-800 placeholder-gray-400"
               />
             </div>
+
+            {/* Filter Button */}
+            <button
+              type="button"
+              className="hidden sm:flex items-center justify-center w-12 h-12 rounded-xl hover:bg-gray-100 transition-colors text-gray-500"
+              title="More filters"
+            >
+              <SafeIcon icon={FiFilter} className="w-5 h-5" />
+            </button>
+
+            {/* Search Button */}
             <button
               type="submit"
-              className="bg-blue-600 text-white font-bold py-4 px-8 rounded-xl hover:bg-blue-700 transition-all flex items-center space-x-2 shadow-lg shadow-blue-600/20"
+              className="bg-blue-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
             >
-              <SafeIcon icon={FiSearch} />
-              <span className="hidden sm:inline">Search Listings</span>
+              <SafeIcon icon={FiSearch} className="w-5 h-5" />
+              <span>Search Listing</span>
             </button>
           </form>
         </motion.div>
