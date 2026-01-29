@@ -37,7 +37,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView, showActions = true }) 
       }`}
     >
       {/* Header with Logo/Image */}
-      <div className="relative h-56 bg-gray-50 overflow-hidden">
+      <div className="relative h-56 bg-white overflow-hidden flex items-center justify-center p-6">
         {listing.is_featured && (
           <div className="absolute top-4 left-4 z-20 flex items-center space-x-1.5 bg-soft-yellow text-navy text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg border border-white/20">
             <SafeIcon icon={FiStar} className="fill-current" />
@@ -49,7 +49,7 @@ const ListingCard = ({ listing, onEdit, onDelete, onView, showActions = true }) 
           <img 
             src={listing.logo_url} 
             alt={listing.name} 
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+            className="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105" 
           />
         ) : (
           <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-teal-50">

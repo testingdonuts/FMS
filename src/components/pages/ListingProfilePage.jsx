@@ -108,8 +108,8 @@ const HeroSection = ({ listing }) => (
     <div className="absolute inset-0 bg-gradient-to-t from-navy to-transparent" />
     <div className="absolute bottom-0 left-0 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-end space-x-6">
-        <div className="w-32 h-32 bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden flex-shrink-0">
-          <img src={listing.logo_url || 'https://via.placeholder.com/150'} alt="logo" className="w-full h-full object-cover" />
+        <div className="w-32 h-32 bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
+          <img src={listing.logo_url || 'https://via.placeholder.com/150'} alt="logo" className="max-w-full max-h-full object-contain" />
         </div>
         <div className="text-left">
           <h1 className="text-4xl font-black text-white tracking-tight">{listing.name}</h1>
