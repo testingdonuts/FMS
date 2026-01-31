@@ -11,11 +11,58 @@ const Hero = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchData, setSearchData] = useState({
     query: '',
-    date: ''
+    category: '',
+    location: ''
   });
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
 
-  const handleSearch = async () => {
-    if (searchData.query || searchData.date) {
+  const categories = [
+    { value: '', label: 'Select Category' },
+    { value: '77', label: 'Additional Needs/OT' },
+    { value: '76', label: 'Automotive' },
+    { value: '75', label: 'Baby Equipment Hire' },
+    { value: '74', label: 'Car Hire' },
+    { value: '73', label: 'Detailers / Cleaning Services' },
+    { value: '72', label: 'Family Services' },
+    { value: '71', label: 'Installer/Techs' },
+    { value: '70', label: 'Manufacturers' },
+    { value: '69', label: 'Retail' },
+    { value: '68', label: 'Vehicle Modifiers' },
+  ];
+
+  // Sample suggestions for the query field
+  const suggestions = [
+    'Melbourne',
+    'Severance s02',
+    'acri.com.au',
+    'business provider',
+    'sweet',
+    'https://promisedgardenltd.com/'
+  ];
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSearchData({ ...searchData, [name]: value });
+    if (name === 'query') {
+      if (value.length > 0) {
+        setFilteredSuggestions(suggestions.filter(s => s.toLowerCase().includes(value.toLowerCase())));
+        setShowSuggestions(true);
+      } else {
+        setShowSuggestions(false);
+      }
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchData({ ...searchData, query: suggestion });
+    setShowSuggestions(false);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setShowSuggestions(false);
+    if (searchData.query || searchData.category || searchData.location) {
       setShowSearch(true);
     }
   };
@@ -44,37 +91,86 @@ const Hero = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="bg-white rounded-2xl p-6 shadow-lg mb-8">
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="relative">
-                  <SafeIcon icon={FiSearch} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <form className="bg-white rounded-2xl shadow-lg mb-8 px-4 py-3" onSubmit={handleSearch}>
+              <div className="flex flex-col md:flex-row items-center gap-2 md:gap-0">
+                {/* Query Field */}
+                <div className="relative flex-1 w-full md:w-auto">
                   <input
+                    id="query"
+                    name="query"
                     type="text"
-                    placeholder="Event or Venue"
+                    placeholder="What are you looking for?"
                     value={searchData.query}
-                    onChange={(e) => setSearchData({ ...searchData, query: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onChange={handleChange}
+                    onFocus={() => searchData.query && setShowSuggestions(true)}
+                    autoComplete="off"
+                    className="w-full border-0 border-b-2 border-blue-400 focus:ring-0 focus:border-blue-600 pl-4 pr-4 py-3 bg-transparent text-gray-900 placeholder-gray-400"
                   />
+                  {showSuggestions && filteredSuggestions.length > 0 && (
+                    <ul className="absolute left-0 mt-2 w-full bg-black text-white rounded-lg shadow-lg z-20">
+                      {filteredSuggestions.map((suggestion, idx) => (
+                        <li
+                          key={idx}
+                          className="px-4 py-2 cursor-pointer hover:bg-blue-600"
+                          onClick={() => handleSuggestionClick(suggestion)}
+                        >
+                          {suggestion}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <div className="relative">
-                  <SafeIcon icon={FiCalendar} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                {/* Category Field */}
+                <div className="relative flex-1 w-full md:w-auto md:mx-2">
+                  <select
+                    id="category"
+                    name="category"
+                    value={searchData.category}
+                    onChange={handleChange}
+                    className="w-full border-0 border-b-2 border-blue-400 focus:ring-0 focus:border-blue-600 pl-4 pr-8 py-3 bg-transparent text-gray-900"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    ))}
+                  </select>
+                  <span className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                    <FiIcons.FiChevronDown />
+                  </span>
+                </div>
+                {/* Location Field */}
+                <div className="relative flex-1 w-full md:w-auto">
                   <input
-                    type="date"
-                    value={searchData.date}
-                    onChange={(e) => setSearchData({ ...searchData, date: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    id="location"
+                    name="location"
+                    type="text"
+                    placeholder="Address, city, postcode"
+                    value={searchData.location}
+                    onChange={handleChange}
+                    className="w-full border-0 border-b-2 border-blue-400 focus:ring-0 focus:border-blue-600 pl-4 pr-4 py-3 bg-transparent text-gray-900 placeholder-gray-400"
+                    autoComplete="off"
                   />
+                  <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <FiIcons.FiMapPin />
+                  </span>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSearch}
-                  className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                {/* Filter Icon */}
+                <button
+                  type="button"
+                  className="mx-2 p-2 rounded-full bg-white border border-gray-200 hover:bg-gray-100 text-gray-500 flex items-center justify-center"
+                  tabIndex={-1}
+                  aria-label="Filter"
                 >
-                  Search Seats
-                </motion.button>
+                  <FiIcons.FiFilter size={20} />
+                </button>
+                {/* Search Button */}
+                <button
+                  type="submit"
+                  className="ml-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center"
+                >
+                  <FiIcons.FiSearch className="mr-2" /> Search Listing
+                </button>
               </div>
-            </div>
+            </form>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6">

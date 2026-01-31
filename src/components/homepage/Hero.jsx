@@ -7,20 +7,11 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiSearch, FiChevronDown, FiFilter, FiX, FiClock } = FiIcons;
 
-const CATEGORY_OPTIONS = [
-  { value: '', label: 'All Categories' },
-  { value: 'installer', label: 'Installer/Techs' },
-  { value: 'retailer', label: 'Retailers' },
-  { value: 'rental', label: 'Equipment Rental' },
-  { value: 'training', label: 'Training Centers' },
-];
-
 const MOBILE_SERVICE_OPTIONS = [
   { value: '', label: 'Any' },
   { value: 'yes', label: 'Yes' },
   { value: 'no', label: 'No' },
 ];
-
 
 const RADIUS_OPTIONS = [
   { value: 10, label: '10 km' },
@@ -33,8 +24,8 @@ const RADIUS_OPTIONS = [
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
-  const [category, setCategory] = useState('installer');
   const [coordinates, setCoordinates] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -48,12 +39,12 @@ const Hero = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     const params = new URLSearchParams();
+    if (searchQuery) params.append('query', searchQuery);
     if (location) params.append('loc', location);
     if (coordinates) {
       params.append('lat', coordinates.lat);
       params.append('lng', coordinates.lng);
     }
-    if (category) params.append('category', category);
     if (filters.zipcode) params.append('zipcode', filters.zipcode);
     if (filters.mobileService) params.append('mobile', filters.mobileService);
     if (filters.openNow) params.append('openNow', 'true');
@@ -90,7 +81,7 @@ const Hero = () => {
           transition={{ duration: 0.6 }}
           className="text-4xl md:text-6xl font-bold text-white tracking-tight"
         >
-          Find a Child Passenger Safety Expert Near You
+          Find Child Passenger Safety Services, Equipment & Experts Near You
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -98,7 +89,7 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto"
         >
-          Search by location to find certified technicians, safety services, and equipment rentals in your area.
+          Search for any service, equipment rental, or expert by name and find providers near your location.
         </motion.p>
 
         <motion.div
@@ -108,21 +99,16 @@ const Hero = () => {
           className="mt-10 max-w-4xl mx-auto bg-white p-4 sm:p-5 rounded-2xl shadow-2xl shadow-navy/10 border border-gray-100"
         >
           <form onSubmit={handleSearch} className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 lg:gap-0">
-            {/* What are you looking for - Label + Dropdown */}
-            <div className="flex items-center gap-3 px-5 py-4 lg:py-0 border-b lg:border-b-0 lg:border-r border-gray-200 shrink-0">
-              <span className="text-sm text-gray-500 whitespace-nowrap">What are you looking for?</span>
-              <div className="relative">
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="appearance-none bg-transparent pr-8 py-2 text-gray-800 font-semibold focus:outline-none cursor-pointer border-none text-base"
-                >
-                  {CATEGORY_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <SafeIcon icon={FiChevronDown} className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-5 h-5" />
-              </div>
+            {/* What are you looking for - Search Input */}
+            <div className="flex-1 relative flex items-center border-b lg:border-b-0 lg:border-r border-gray-200 px-5 min-w-[200px]">
+              <SafeIcon icon={FiSearch} className="absolute left-0 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="What service, equipment, or expert are you looking for?"
+                className="w-full pl-8 pr-4 py-4 bg-transparent border-none focus:ring-0 focus:outline-none text-gray-800 placeholder-gray-400 text-base"
+              />
             </div>
 
             {/* Location Input */}
@@ -155,7 +141,7 @@ const Hero = () => {
               className="bg-blue-500 text-white font-semibold py-4 px-8 rounded-xl hover:bg-blue-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 whitespace-nowrap shrink-0"
             >
               <SafeIcon icon={FiSearch} className="w-5 h-5" />
-              <span>Search Listing</span>
+              <span>Search</span>
             </button>
           </form>
         </motion.div>
